@@ -1,0 +1,4 @@
+. .com.amazon.www 0 NS IN .com
+.com .com.amazon.www 0 NS IN .com.amazon
+.com.amazon .com.amazon.www 0 NS IN .com.amazon.www
+.com.amazon.www .com.amazon.www 0 A IN 192.168.1.100
