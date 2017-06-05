@@ -78,7 +78,7 @@ public class DomainTree
 	String lastOwner = "";
 	for(String line : lines)
         {
-	    line = line.trim().replaceAll("[{ +}\\t]", " ");
+	    line = line.trim().replaceAll("([ \t]+)", " ");
 
 	    String[] tokens = line.split(" ");
 	    // trueOwner owns the rr in the domain space

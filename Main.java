@@ -21,6 +21,6 @@ public class Main
 	String ipAddr2 = resolver.askAndWait(args[2], RequestType.IPv4);
 	
 	System.out.printf("'%s' corresponding IPv4 address is:  %s\n",
-			  args[1], ipAddr);
+			  args[2], ipAddr);
     }
 }
