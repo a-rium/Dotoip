@@ -228,7 +228,8 @@ public class DomainTree
 			 // @WhatIf there are multiple address for the given domain address
 			response.answers.add(rr);
 		    }
-		    else if(rr.type == ResourceRecord.Type.NS)
+		    else if(rr.type == ResourceRecord.Type.NS ||
+			    rr.type == ResourceRecord.Type.CNAME)
 		    {
 			response.authority.add(rr);
 		    }

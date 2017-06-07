@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.File;
 
 import src.DomainTree;
 import src.CacheServer;
@@ -10,6 +11,9 @@ public class Main
     public static void main(String[] args)
 	throws IOException
     {
+	String[] dirs = {"log/server", "log/resolver"};
+	buildFilesystemStructure(dirs);
+	    
 	DomainTree domainSpace = DomainTree.fromFile(args[0]);
 	domainSpace.loadResourceRecords(args[1]);
 	
@@ -22,5 +26,15 @@ public class Main
 	
 	System.out.printf("'%s' corresponding IPv4 address is:  %s\n",
 			  args[2], ipAddr);
+    }
+
+    private static void buildFilesystemStructure(String[] dirs)
+    {
+	for(String dir : dirs)
+	{
+	    File explorer = new File(dir);
+	    if(!explorer.exists())
+		explorer.mkdirs();
+	}
     }
 }

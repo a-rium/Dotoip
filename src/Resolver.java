@@ -1,5 +1,9 @@
 package src;
 
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Resolver
@@ -10,6 +14,9 @@ public class Resolver
     private static final String NotSet = "NotSet";
 
     private static int globalRequestCounter = 0;
+
+    private static final String LogDirectory = "log/resolver";
+    private static final String LogPrefix    = "resolve_";
     
     public Resolver(CacheServer server)
     {
@@ -67,10 +74,39 @@ public class Resolver
 
 	public void run()
 	{
+	    long time = System.nanoTime();
+	    
 	    int responseCode        = server.query(domainAddress, what);
 	    ResourceRecord response = server.getOrWait(responseCode);
-
 	    pendingRequests.put(requestCode, response.rdata);
+	    
+	    time = System.nanoTime() - time;
+	    String filename = LogDirectory + "/" + LogPrefix + domainAddress.replaceAll("\\.", "") + ".txt";
+	    if(!writeLog(filename, response, time))
+		System.out.println("Printed correctly");
        	}
+
+	private boolean writeLog(String filename, ResourceRecord response, long nanoTime)
+	{
+	    try
+	    {
+		PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+
+		out.println("Starting exchange with the cache server");
+		out.println("-------------------------------------------------------");
+		out.println("Requested IP address of: " + domainAddress);
+		out.println("Cache server response: "   + response.rdata);
+		out.println("Time elapsed: " + (((double)nanoTime)/100000000));
+
+		out.close();
+		
+		return true;
+	    }
+	    catch(IOException ie)
+	    {
+		ie.printStackTrace();
+		return false;
+	    }
+	}
     }
 }

@@ -1,5 +1,10 @@
 package src;
 
+import java.io.PrintWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import java.util.List;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -93,6 +98,9 @@ public class CacheServer
 	private String              domainAddress;
 	private ResourceRecord.Type type;
 	private int responseCode;
+
+	private static final String LogDirectory = "log/server";
+	private static final String LogPrefix    = "dt_search_";
 	
 	public ResourceGetter(String domainAddress,
 			      ResourceRecord.Type type,
@@ -108,59 +116,118 @@ public class CacheServer
 	public void run()
 	{
        	    ArrayList<DomainTree> authorities = new ArrayList<>();
+	    ArrayList<String>     log         = new ArrayList<>();
+	    ArrayList<String>     domainNames = new ArrayList<>();
+
 	    authorities.add(TLD);
+	    domainNames.add(domainAddress);
+
+	    ResourceRecord responseRecord = null;
 	    
 	    boolean gotAnswer = false;
 	    while(!gotAnswer && authorities.size() > 0)
 	    {
 		DomainTree currentAuthority = authorities.remove(authorities.size()-1);  // pop()
+
+		ArrayList<String> tempNames = new ArrayList<>(); // used to gather all the CNAMEs found
+		for(String name : domainNames)
+		{
+		    Message message = new Message();
+		    message.header.method = Message.QueryMethod.ITERATIVE;
+		    message.question.name = name;
+		    message.question.type = this.type;
+
+		    log.add("Request: " + message.header.method + " query, searching in domain '" + currentAuthority.getDomainAddress() + "' for " + this.type + " records of '" + name + "'");
+
+		    long elapsedTime = System.nanoTime();
 		
-		Message message = new Message();
-		message.header.method = Message.QueryMethod.ITERATIVE;
-		message.question.name = domainAddress;
-		message.question.type = this.type;
+		    Message response = currentAuthority.query(message);
 
-		Message response = currentAuthority.query(message);
-
-		for(ResourceRecord rr : response.answers)
-		{
-		    switch(rr.type)
+		    elapsedTime = System.nanoTime() - elapsedTime;
+		    log.add("Response received in " + (((double)elapsedTime)/1000000000) + " seconds.");
+		
+		    for(ResourceRecord rr : response.answers)
 		    {
-		        case A:
-		        case AAAA:
+			switch(rr.type)
 			{
-			    if(type == rr.type)
+			    case A:
+			    case AAAA:
 			    {
-				responses.put(responseCode, rr);
-				cache.get(domainAddress).add(rr); 
-				gotAnswer = true;
-			    }
-			} break;
+				if(type == rr.type)
+				{
+				    responseRecord = rr;
+				    cache.get(domainAddress).add(rr); 
+				    gotAnswer = true;
+				    
+				    log.add("---- Received IP address: " + rr.rdata);
+				}
+			    } break;
+		        }
 		    }
-		}
 		    
-		for(ResourceRecord rr : response.authority)
-		{
-		    switch(rr.type)
+		    for(ResourceRecord rr : response.authority)
 		    {
-		        case NS:
+			switch(rr.type)
 			{
-			    DomainTree delegate = TLD.getSubtree(rr.rdata);
-			    authorities.add(delegate);
-			} break;
+			    case NS:
+			    {
+				DomainTree delegate = TLD.getSubtree(rr.rdata);
+				authorities.add(delegate);
+				
+				log.add("--- Pointed delegate '" + rr.rdata + "'");
+			    } break;
+			    case CNAME:
+			    {
+				tempNames.add(rr.rdata);
+
+				log.add("--- Found alias '" + rr.rdata + "'");
+			    } break;
+			}
+		    }
+		    
+		    for(ResourceRecord rr : response.additional)
+		    {
+			System.out.println(rr.rdata);
+			/* switch(rr.type)
+			   {
+			   }*/
 		    }
 		}
 
-		for(ResourceRecord rr : response.additional)
-		{
-		    System.out.println(rr.rdata);
-		    /* switch(rr.type)
-		    {
-		    }*/
-		}
+		for(String names : tempNames) // Moving from the temporary array to the real one
+		    domainNames.add(names);
 	    }
 	    if(!gotAnswer)
-		responses.put(responseCode, new ResourceRecord(domainAddress, ResourceRecord.Type.UNSET, 0, "Not found"));
+	    {
+		log.add("Could not find an appropriate answer for the request");
+		responseRecord = new ResourceRecord(domainAddress, ResourceRecord.Type.UNSET, 0, "Not found");
+	    }
+	    
+	    responses.put(responseCode, responseRecord);
+
+	    String filename = LogDirectory + "/" + LogPrefix + domainAddress.replaceAll("\\.", "") + ".txt";
+	    writeLog(filename, log);
+	}
+
+	private boolean writeLog(String filename, List<String> log)
+	{
+	    try
+	    {
+		PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+
+		out.println("Received message from resolver, request IP of '" + domainAddress + "'");
+		out.println("---------------------------------------------------");
+		for(String line : log)
+		    out.println(line);
+
+		out.close();
+		
+		return true;
+	    }
+	    catch(IOException ie)
+	    {
+		return false;
+	    }
 	}
     }
 }
