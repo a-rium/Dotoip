@@ -215,7 +215,7 @@ public class CacheServer
 	    {
 		PrintWriter out = new PrintWriter(new FileOutputStream(filename));
 
-		out.println("Received message from resolver, request IP of '" + domainAddress + "'");
+		out.println("Received message from resolver, requested IP of '" + domainAddress + "'");
 		out.println("---------------------------------------------------");
 		for(String line : log)
 		    out.println(line);
