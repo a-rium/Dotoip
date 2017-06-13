@@ -6,12 +6,15 @@ import src.CacheServer;
 import src.Resolver;
 import src.RequestType;
 
+import gui.MainWindow;
+
 public class Main
 {
     public static void main(String[] args)
 	throws IOException
     {
-	String[] dirs = {"log/server", "log/resolver"};
+	new MainWindow();
+	/*	String[] dirs = {"log/server", "log/resolver"};
 	buildFilesystemStructure(dirs);
 	    
 	DomainTree domainSpace = DomainTree.fromFile(args[0]);
@@ -22,10 +25,11 @@ public class Main
 
 	String ipAddr = resolver.askAndWait(args[2], RequestType.IPv4);
 
-	String ipAddr2 = resolver.askAndWait(args[2], RequestType.IPv4);
+	// Cache test
+	// String ipAddr2 = resolver.askAndWait(args[2], RequestType.IPv4);
 	
 	System.out.printf("'%s' corresponding IPv4 address is:  %s\n",
-			  args[2], ipAddr);
+	args[2], ipAddr); */
     }
 
     private static void buildFilesystemStructure(String[] dirs)

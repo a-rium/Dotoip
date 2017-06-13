@@ -17,22 +17,19 @@ public class DomainTree
     private ArrayList<DomainTree> subtrees;
 
     private ArrayList<ResourceRecord> rrs;
-    //    private HashMap<ResourceRecord.Type, ArrayList<ResourceRecord>> rrs;
 
     public DomainTree()
     {
-	this.label    = null;
-	this.subtrees = new ArrayList<DomainTree>();
-	this.rrs      = new ArrayList<ResourceRecord>();
-	//this.rrs      = new HashMap<ResourceRecord.Type, ArrayList<ResourceRecord>>();
+    	this.label    = null;
+    	this.subtrees = new ArrayList<DomainTree>();
+    	this.rrs      = new ArrayList<ResourceRecord>();
     }
-    
+
     public DomainTree(String label)
     {
 	this.label    = label;
 	this.subtrees = new ArrayList<DomainTree>();
 	this.rrs      = new ArrayList<ResourceRecord>();
-	//	this.rrs      = new HashMap<ResourceRecord.Type, ArrayList<ResourceRecord>>();
     }
 
     public DomainTree(String label, DomainTree parent)
@@ -41,7 +38,6 @@ public class DomainTree
 	this.parent   = parent;
 	this.subtrees = new ArrayList<DomainTree>();
 	this.rrs      = new ArrayList<ResourceRecord>();
-	//	this.rrs      = new HashMap<ResourceRecord.Type, ArrayList<ResourceRecord>>();
     }
 
     public static DomainTree fromFile(String filename) throws IOException
@@ -130,7 +126,7 @@ public class DomainTree
 	while(index < domains.length)
 	{
 	    String domain = domains[index];
-	    
+
 	    boolean exists = false;
 	    for(DomainTree child : cursor.subtrees)
 	    {
@@ -144,7 +140,7 @@ public class DomainTree
 
 	    if(!exists)
 		return;
-	    
+
 	    index++;
 	}
 	cursor.rrs.add(rr);
@@ -156,7 +152,12 @@ public class DomainTree
 	subtrees.add(subtree);
 	return subtree;
     }
-    
+
+    public List<DomainTree> getSubtrees()
+    {
+  	   return subtrees;
+    }
+
     public int getDepth()
     {
 	DomainTree cursor = this;
@@ -165,10 +166,10 @@ public class DomainTree
 	{
 	    cursor = cursor.parent;
 	    depth++;
-	}    
+	}
 	return depth;
     }
-    
+
     public String getDomainAddress(boolean reversed)
     {
 	if(parent == null)
@@ -182,6 +183,11 @@ public class DomainTree
     public String getDomainAddress()
     {
 	return getDomainAddress(false);
+    }
+
+    public DomainTree getParent()
+    {
+      return parent;
     }
 
     public DomainTree getSubtree(String domainAddress)
@@ -216,7 +222,7 @@ public class DomainTree
 	{
 	    System.out.println("Responding...");
 	    Message response = new Message();
-	    
+
 	    String requestedAddress = request.question.name;
 	    System.out.println("RR array size: " + rrs.size());
 	    for(ResourceRecord rr : rrs)
@@ -239,22 +245,45 @@ public class DomainTree
 		    System.out.println("Found " + rr.type);
 		}
 	    }
-	    
+
 	    return response;
 	}
 	return null;
     }
 
+
+    public boolean removeDomain(DomainTree e)
+    {
+      int i = 0;
+      while(i<subtrees.size())
+      {
+        // @Important : I know that I am comparing the references
+        // In this application I will be getting references always from the
+        // same tree, so there is not any problem. However, if this coded
+        // will be reused, it would be safer to change this to a value comparison
+        if(e == subtrees.get(i))
+        {
+          subtrees.remove(i);
+          return true;
+        }
+      }
+      return false;
+    }
+
     @Override
     public String toString()
     {
-	String spacing = "";
-	for(int i = 0; i<getDepth(); i++)
-	    spacing += "----";
-	
-	String string = spacing + this.label + '\n';
-        for(DomainTree subtree : subtrees)
-	    string += subtree.toString();
-	return string;
+      return label;
+    }
+    public String toStringSubtree()
+    {
+    	String spacing = "";
+    	for(int i = 0; i<getDepth(); i++)
+    	    spacing += "----";
+
+    	String string = spacing + this.label + '\n';
+            for(DomainTree subtree : subtrees)
+    	    string += subtree.toString();
+    	return string;
     }
 }
