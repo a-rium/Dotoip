@@ -12,7 +12,7 @@ import java.nio.charset.Charset;
 
 public class DomainTree
 {
-    private String label;
+    public String label;
     private DomainTree parent;
     private ArrayList<DomainTree> subtrees;
 
@@ -146,6 +146,14 @@ public class DomainTree
 	cursor.rrs.add(rr);
     }
 
+    public void addResourceRecords(List<ResourceRecord> rrs)
+    {
+      for(ResourceRecord rr : rrs)
+      {
+        rrs.add(rr);
+      }
+    }
+
     public DomainTree addDomain(String domain)
     {
 	DomainTree subtree = new DomainTree(domain, this);
@@ -188,6 +196,11 @@ public class DomainTree
     public DomainTree getParent()
     {
       return parent;
+    }
+
+    public ArrayList<ResourceRecord> getResourceRecords()
+    {
+      return rrs;
     }
 
     public DomainTree getSubtree(String domainAddress)
