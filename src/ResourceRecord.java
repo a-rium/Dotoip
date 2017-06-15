@@ -32,33 +32,33 @@ public class ResourceRecord
     }
   }
 
-    public String owner;      // The owner is the full address of the DomainTree who the Resource Record is referring to
-    public Type   type;
-    public int    timeToLive;
-    public String rdata;
+  public String owner;      // The owner is the full address of the DomainTree who the Resource Record is referring to
+  public Type   type;
+  public int    timeToLive;
+  public String rdata;
 
-    public static ResourceRecord INVALID = new ResourceRecord();
+  public static ResourceRecord INVALID = new ResourceRecord();
 
-    public ResourceRecord()
-    {
-	this.owner      = "";
-	this.type       = Type.UNSET;
-	this.timeToLive = 0;
-	this.rdata      = "";
-    }
+  public ResourceRecord()
+  {
+  	this.owner      = "";
+  	this.type       = Type.UNSET;
+  	this.timeToLive = 0;
+  	this.rdata      = "";
+  }
 
-    public ResourceRecord(String owner, Type type,
-			  int timeToLive, String rdata)
-    {
-	this.owner      = owner;
-	this.type       = type;
-	this.timeToLive = timeToLive;
-	this.rdata      = rdata;
-    }
+  public ResourceRecord(String owner, Type type,
+		  int timeToLive, String rdata)
+  {
+  	this.owner      = owner;
+  	this.type       = type;
+  	this.timeToLive = timeToLive;
+  	this.rdata      = rdata;
+  }
 
-    @Override
-    public String toString()
-    {
-      return owner + " " + timeToLive + " " + type + " IN " + rdata;
-    }
+  @Override
+  public String toString()
+  {
+    return owner + " " + timeToLive + " " + type + " IN " + rdata;
+  }
 }

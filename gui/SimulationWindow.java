@@ -23,6 +23,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
 import javax.swing.JComboBox;
+import javax.swing.JCheckBox;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JDialog;
@@ -299,7 +300,7 @@ public class SimulationWindow extends JFrame
       extends JDialog
       implements ActionListener
     {
-      private final static String Title = "Dotoip - Add server";
+      private final static String Title = "Dotoip - Setup server";
 
       protected JTextField labelField;
       protected JButton    okButton;
@@ -309,10 +310,13 @@ public class SimulationWindow extends JFrame
       protected JButton removeRecordButton;
       protected JButton clearRecordButton;
 
+      protected JCheckBox autoNsRecordCheck;
+
       protected DefaultListModel<ResourceRecord> rrModel;
       protected JList<ResourceRecord> rrList;
 
       protected List<ResourceRecord> rrs;
+      protected List<ResourceRecord> backupRrs;
 
       protected DomainTree tree;
 
@@ -340,11 +344,16 @@ public class SimulationWindow extends JFrame
         this.tree = tree;
         this.rrs  = tree.getResourceRecords();
 
+        this.backupRrs = new ArrayList<ResourceRecord>();
+        for(ResourceRecord rr : rrs)
+          backupRrs.add(rr);
+
         this.setSize(new Dimension(440, 440));
         initComponents();
         updateList();
 
         this.labelField.setText(tree.label);
+        this.autoNsRecordCheck.setEnabled(false);
 
         this.setVisible(true);
       }
@@ -390,6 +399,9 @@ public class SimulationWindow extends JFrame
         rrList = new JList<ResourceRecord>(rrModel);
         JScrollPane scrollPane = new JScrollPane(rrList);
 
+        autoNsRecordCheck = new JCheckBox("Add NS record to the parent server");
+        autoNsRecordCheck.setSelected(false);
+
         JPanel databaseOptionPanel = new JPanel(new GridLayout(1, 3));
         addRecordButton    = new JButton("New record");
         removeRecordButton = new JButton("Remove");
@@ -404,6 +416,7 @@ public class SimulationWindow extends JFrame
         databaseOptionPanel.add(clearRecordButton);
 
         databasePanel.add(scrollPane);
+        databasePanel.add(autoNsRecordCheck);
         databasePanel.add(databaseOptionPanel);
 
         JPanel mainPanel = new JPanel();
@@ -429,6 +442,21 @@ public class SimulationWindow extends JFrame
           {
             tree = displayedTree.addDomain(label);
             tree.addResourceRecords(rrs);
+
+            /*if(autoNsRecordCheck.isSelected())
+            {
+              System.out.println("I'm here");
+              List<ResourceRecord> parentRrs = tree.getParent().getResourceRecords();
+              String treeDomainAddress = tree.getDomainAddress();
+              for(ResourceRecord rr : rrs)
+              {
+                ResourceRecord ns = new ResourceRecord(rr.owner,
+                                                       ResourceRecord.Type.NS,
+                                                       0,
+                                                       treeDomainAddress);
+                parentRrs.add(ns);
+              }
+            }*/
           }
           else
           {
@@ -441,6 +469,12 @@ public class SimulationWindow extends JFrame
         else if(src.equals(cancelButton))
         {
           exitState = EXIT_STATE_CANCELLED;
+          if(tree != null)
+          {
+            rrs.clear();
+            for(ResourceRecord rr : backupRrs)
+              rrs.add(rr);
+          }
           dispose();
         }
         else if(src.equals(addRecordButton))
