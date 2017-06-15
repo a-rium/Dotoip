@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import java.io.IOException;
+import java.io.File;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
+import javax.swing.JFileChooser;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
 import javax.swing.JPopupMenu;
@@ -99,6 +101,7 @@ public class SimulationWindow extends JFrame
     {
     	JPanel infoPanel = new JPanel();
     	infoPanel.setBorder(Utils.createTitledBorder("Information"));
+
     	currentDomainAddressLabel = new JLabel(".");
     	infoPanel.add(new JLabel("Current domain address:", SwingConstants.LEFT));
     	infoPanel.add(currentDomainAddressLabel);
@@ -183,7 +186,39 @@ public class SimulationWindow extends JFrame
     	mainPanel.add(tldPanel);
     	mainPanel.add(inputPanel);
 
-    	this.add(mainPanel);
+      JButton saveButton = new JButton("Save");
+      saveButton.addActionListener((e) ->
+      {
+        JFileChooser chooser = new JFileChooser(".");
+
+        int responseCode = chooser.showSaveDialog(SimulationWindow.this);
+
+        if(responseCode == JFileChooser.CANCEL_OPTION)
+        {
+          return;
+        }
+
+        File domainDb = chooser.getSelectedFile();
+
+        responseCode = chooser.showSaveDialog(SimulationWindow.this);
+
+        if(responseCode ==  JFileChooser.APPROVE_OPTION)
+        {
+          try
+          {
+            File rrDb = chooser.getSelectedFile();
+            TLD.writeDomains(domainDb);
+            TLD.writeResourceRecords(rrDb);
+          }
+          catch(IOException ie)
+          {
+            ie.printStackTrace();
+          }
+        }
+      });
+
+    	this.add(mainPanel,  BorderLayout.CENTER);
+      this.add(saveButton, BorderLayout.SOUTH);
     }
 
     private boolean updateDisplay()
@@ -281,6 +316,7 @@ public class SimulationWindow extends JFrame
               displayedTree.removeDomain(aux);
               updateDisplay();
             }
+            forwardButton.setEnabled(false);
           }
         }
         else if(src.equals(changeServer))
@@ -443,7 +479,7 @@ public class SimulationWindow extends JFrame
             tree = displayedTree.addDomain(label);
             tree.addResourceRecords(rrs);
 
-            /*if(autoNsRecordCheck.isSelected())
+            if(autoNsRecordCheck.isSelected())
             {
               System.out.println("I'm here");
               List<ResourceRecord> parentRrs = tree.getParent().getResourceRecords();
@@ -456,7 +492,7 @@ public class SimulationWindow extends JFrame
                                                        treeDomainAddress);
                 parentRrs.add(ns);
               }
-            }*/
+            }
           }
           else
           {

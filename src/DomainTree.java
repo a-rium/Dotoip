@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import java.io.IOException;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
 import java.io.File;
 
 import java.nio.file.Files;
@@ -50,6 +52,7 @@ public class DomainTree
       DomainTree cursor = root;
       for(String domain : domains)
       {
+        if(domain.isEmpty()) continue;
         boolean exists = false;
         for(DomainTree subtree : cursor.subtrees)
         {
@@ -148,7 +151,7 @@ public class DomainTree
   {
     for(ResourceRecord rr : rrs)
     {
-      rrs.add(rr);
+      this.rrs.add(rr);
     }
   }
 
@@ -296,5 +299,75 @@ public class DomainTree
     for(DomainTree subtree : subtrees)
       string += subtree.toString();
   	return string;
+  }
+
+  public void writeDomains(File file)
+    throws IOException
+  {
+    if(file.exists())
+    {
+      PrintWriter wout = new PrintWriter(new FileOutputStream(file));
+      wout.close();
+    }
+    PrintWriter wout = new PrintWriter(new FileOutputStream(file, true));
+    writeDomainsRecursive(wout);
+    wout.close();
+  }
+
+  private void writeDomainsRecursive(PrintWriter out)
+    throws IOException
+  {
+    if(subtrees.isEmpty())
+    {
+      if(label == null || label.isEmpty())
+      {
+        out.println(".");
+      }
+      else
+      {
+        out.println(getDomainAddress());
+      }
+    }
+    else
+    {
+      for(DomainTree subtree : subtrees)
+      {
+        subtree.writeDomainsRecursive(out);
+      }
+    }
+  }
+
+  public void writeResourceRecords(File file)
+    throws IOException
+  {
+    if(file.exists())
+    {
+      PrintWriter wout = new PrintWriter(new FileOutputStream(file));
+      wout.close();
+    }
+    PrintWriter wout = new PrintWriter(new FileOutputStream(file, true));
+    writeRecords(wout);
+    wout.close();
+  }
+
+  private void writeRecords(PrintWriter out)
+    throws IOException
+  {
+    for(ResourceRecord rr : rrs)
+    {
+      if(label == null || label.isEmpty())
+      {
+        out.println(". " + rr);
+      }
+      else
+      {
+        out.println(getDomainAddress() + " " + rr);
+      }
+    }
+    // wout.close();
+    for(DomainTree subtree : subtrees)
+    {
+      subtree.writeRecords(out);
+    }
   }
 }
