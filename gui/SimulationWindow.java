@@ -11,6 +11,10 @@ import java.awt.event.MouseEvent;
 
 import java.io.IOException;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+
+import java.nio.file.Files;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -20,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JEditorPane;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JOptionPane;
@@ -41,7 +46,9 @@ import src.ResourceRecord;
 
 import misc.Utils;
 
-public class SimulationWindow extends JFrame
+public class SimulationWindow
+  extends JFrame
+  implements ActionListener
 {
     private final static String Title = "Dotoip - Simulating DNS service...";
 
@@ -51,6 +58,9 @@ public class SimulationWindow extends JFrame
 
     protected JButton backButton;
     protected JButton forwardButton;
+    protected JButton requestButton;
+    protected JButton returnButton;
+    protected JButton saveButton;
 
     protected JTextField domainAddressField;
     protected JLabel     currentDomainAddressLabel;
@@ -68,11 +78,13 @@ public class SimulationWindow extends JFrame
     	this.resolver = new Resolver(this.server);
       this.displayedTree = this.TLD;
 
-    	this.setSize(new Dimension(640, 480));
 
     	initComponents();
 
+      this.pack();
+      // this.setSize(new Dimension(640, 480));
     	this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+      this.setLocationRelativeTo(null);
     	this.setVisible(true);
     }
 
@@ -87,14 +99,15 @@ public class SimulationWindow extends JFrame
     	this.resolver = new Resolver(this.server);
       this.displayedTree = this.TLD;
 
-      this.setSize(new Dimension(640, 480));
 
     	initComponents();
       updateDisplay();
 
+      this.pack();
+      // this.setSize(new Dimension(640, 480));
     	this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+      this.setLocationRelativeTo(null);
     	this.setVisible(true);
-
     }
 
     private void initComponents()
@@ -112,40 +125,8 @@ public class SimulationWindow extends JFrame
     	backButton    = new JButton("<<");
     	forwardButton = new JButton(">>");
 
-    	backButton.addActionListener((e) ->
-    	{
-  	    DomainTree aux = displayedTree.getParent();
-  	    if(aux == null)
-  	    {
-  		    JOptionPane.showMessageDialog(null, "Current node has no parent",
-  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
-  	    }
-  	    else
-  	    {
-      		displayedTree = aux;
-      		updateDisplay();
-          if(displayedTree.getParent() == null)
-            backButton.setEnabled(false);
-          forwardButton.setEnabled(false);
-    	  }
-    	});
-
-    	forwardButton.addActionListener((e) ->
-    	{
-  	    DomainTree aux = serverList.getSelectedValue();
-  	    if(aux == null)
-  	    {
-  		    JOptionPane.showMessageDialog(null, "No server was selected",
-  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
-  	    }
-  	    else
-  	    {
-  		    displayedTree = aux;
-          updateDisplay();
-          backButton.setEnabled(true);
-          forwardButton.setEnabled(false);
-  	    }
-    	});
+    	backButton.addActionListener(this);
+    	forwardButton.addActionListener(this);
 
       backButton.setEnabled(false);
       forwardButton.setEnabled(false);
@@ -164,18 +145,12 @@ public class SimulationWindow extends JFrame
     	JPanel inputPanel = new JPanel();
 
     	domainAddressField = new JTextField();
-    	JButton requestButton = new JButton("Ask");
+    	requestButton      = new JButton("Ask");
 
-    	domainAddressField.setPreferredSize(new Dimension(getWidth()*7/8 - 10 , 40));
-    	requestButton.setPreferredSize(new Dimension(getWidth()/8 - 10, 40));
+    	domainAddressField.setPreferredSize(new Dimension(375, 40));
+    	requestButton.setPreferredSize(new Dimension(90, 40));
 
-    	requestButton.addActionListener((e) ->
-    	{
-    	    String domainAddress = domainAddressField.getText();
-    	    String address = resolver.askAndWait(domainAddress,
-    						 RequestType.IPv4);
-    	    System.out.println("Ip Address: " + address);
-    	});
+    	requestButton.addActionListener(this);
 
     	inputPanel.add(domainAddressField);
     	inputPanel.add(requestButton);
@@ -186,39 +161,19 @@ public class SimulationWindow extends JFrame
     	mainPanel.add(tldPanel);
     	mainPanel.add(inputPanel);
 
+      JPanel optionPanel = new JPanel();
+
+      returnButton = new JButton("<< Go back to main menu");
+      returnButton.addActionListener(this);
+
       JButton saveButton = new JButton("Save");
-      saveButton.addActionListener((e) ->
-      {
-        JFileChooser chooser = new JFileChooser(".");
+      saveButton.addActionListener(this);
 
-        int responseCode = chooser.showSaveDialog(SimulationWindow.this);
+      optionPanel.add(returnButton);
+      optionPanel.add(saveButton);
 
-        if(responseCode == JFileChooser.CANCEL_OPTION)
-        {
-          return;
-        }
-
-        File domainDb = chooser.getSelectedFile();
-
-        responseCode = chooser.showSaveDialog(SimulationWindow.this);
-
-        if(responseCode ==  JFileChooser.APPROVE_OPTION)
-        {
-          try
-          {
-            File rrDb = chooser.getSelectedFile();
-            TLD.writeDomains(domainDb);
-            TLD.writeResourceRecords(rrDb);
-          }
-          catch(IOException ie)
-          {
-            ie.printStackTrace();
-          }
-        }
-      });
-
-    	this.add(mainPanel,  BorderLayout.CENTER);
-      this.add(saveButton, BorderLayout.SOUTH);
+    	this.add(mainPanel,   BorderLayout.CENTER);
+      this.add(optionPanel, BorderLayout.SOUTH);
     }
 
     private boolean updateDisplay()
@@ -232,6 +187,93 @@ public class SimulationWindow extends JFrame
         return true;
       }
       return false;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e)
+    {
+      Object src = e.getSource();
+      if(src.equals(backButton))
+      {
+  	    DomainTree aux = displayedTree.getParent();
+  	    if(aux == null)
+  	    {
+  		    JOptionPane.showMessageDialog(null, "Current node has no parent",
+  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
+  	    }
+  	    else
+  	    {
+      		displayedTree = aux;
+      		updateDisplay();
+          if(displayedTree.getParent() == null)
+            backButton.setEnabled(false);
+          forwardButton.setEnabled(false);
+    	  }
+    	}
+      else if(src.equals(forwardButton))
+      {
+  	    DomainTree aux = serverList.getSelectedValue();
+  	    if(aux == null)
+  	    {
+  		    JOptionPane.showMessageDialog(null, "No server was selected",
+  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
+  	    }
+  	    else
+  	    {
+  		    displayedTree = aux;
+          updateDisplay();
+          backButton.setEnabled(true);
+          forwardButton.setEnabled(false);
+  	    }
+    	}
+      else if(src.equals(requestButton))
+      {
+    	    String domainAddress = domainAddressField.getText();
+    	    String address = resolver.askAndWait(domainAddress,
+    						                               RequestType.IPv4);
+          try
+          {
+            List<String> resolverLogLines = Files.readAllLines(new File(Resolver.LastFileWrote).toPath());
+            List<String> serverLogLines = Files.readAllLines(new File(CacheServer.LastFileWrote).toPath());
+            ResponseLogDialog logDialog = new ResponseLogDialog(resolverLogLines, serverLogLines, address);
+          }
+          catch(IOException ie)
+          {
+            ie.printStackTrace();
+          }
+    	}
+      else if(src.equals(returnButton))
+      {
+        new MainWindow();
+        dispose();
+      }
+      else if(src.equals(saveButton))
+      {
+        JFileChooser chooser = new JFileChooser(".");
+
+        int responseCode = chooser.showSaveDialog(SimulationWindow.this);
+        if(responseCode == JFileChooser.CANCEL_OPTION)
+        {
+          return;
+        }
+
+        File domainDb = chooser.getSelectedFile();
+
+        responseCode = chooser.showSaveDialog(SimulationWindow.this);
+        if(responseCode ==  JFileChooser.APPROVE_OPTION)
+        {
+          try
+          {
+            File rrDb = chooser.getSelectedFile();
+            TLD.writeDomains(domainDb);
+            TLD.writeResourceRecords(rrDb);
+          }
+          catch(IOException ie)
+          {
+            ie.printStackTrace();
+          }
+        }
+      }
     }
 
     private class DomainListMouseListener
@@ -270,6 +312,7 @@ public class SimulationWindow extends JFrame
       private JMenuItem addServer;
       private JMenuItem removeServer;
       private JMenuItem changeServer;
+      private JMenuItem rootInfo;
 
       public DomainListPopupMenu()
       {
@@ -277,10 +320,12 @@ public class SimulationWindow extends JFrame
         addServer    = new JMenuItem("Add new server...");
         removeServer = new JMenuItem("Remove selected server");
         changeServer = new JMenuItem("Modify selected server");
+        rootInfo     = new JMenuItem("Modify root server info");
 
         addServer.addActionListener(this);
         removeServer.addActionListener(this);
         changeServer.addActionListener(this);
+        rootInfo.addActionListener(this);
 
         removeServer.setEnabled(serverList.getSelectedValue() != null);
         changeServer.setEnabled(serverList.getSelectedValue() != null);
@@ -288,6 +333,8 @@ public class SimulationWindow extends JFrame
         this.add(addServer);
         this.add(removeServer);
         this.add(changeServer);
+        this.addSeparator();
+        this.add(rootInfo);
       }
 
       @Override
@@ -299,7 +346,6 @@ public class SimulationWindow extends JFrame
           SetupServerDialog dialog = new SetupServerDialog();
           if(dialog.exitState == SetupServerDialog.EXIT_STATE_OK)
           {
-            System.out.println("Popup closed successfully");
             updateDisplay();
           }
         }
@@ -325,9 +371,12 @@ public class SimulationWindow extends JFrame
           SetupServerDialog dialog = new SetupServerDialog(aux);
           if(dialog.exitState == SetupServerDialog.EXIT_STATE_OK)
           {
-            System.out.println("Popup closed successfully");
             updateDisplay();
           }
+        }
+        else if(src.equals(rootInfo))
+        {
+          SetupServerDialog dialog = new SetupServerDialog(TLD, false);
         }
       }
     }
@@ -369,11 +418,12 @@ public class SimulationWindow extends JFrame
 
         this.setSize(new Dimension(440, 440));
         initComponents();
+        //this.pack();
 
         this.setVisible(true);
       }
 
-      public SetupServerDialog(DomainTree tree)  // modify already existing tree
+      public SetupServerDialog(DomainTree tree, boolean modifiableLabel)  // modify already existing tree
       {
         super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
 
@@ -389,9 +439,16 @@ public class SimulationWindow extends JFrame
         updateList();
 
         this.labelField.setText(tree.label);
+        this.labelField.setEnabled(modifiableLabel);
         this.autoNsRecordCheck.setEnabled(false);
 
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
+      }
+
+      public SetupServerDialog(DomainTree tree)
+      {
+        this(tree, true);
       }
 
       private void initComponents()
@@ -403,8 +460,8 @@ public class SimulationWindow extends JFrame
                                       SwingConstants.RIGHT);
         labelField = new JTextField();
 
-        labelLabel.setPreferredSize(new Dimension(getWidth()/4, 40));
-        labelField.setPreferredSize(new Dimension(getWidth()/2-10, 40));
+        labelLabel.setPreferredSize(new Dimension(110, 40));
+        labelField.setPreferredSize(new Dimension(210, 40));
 
         labelPanel.add(labelLabel);
         labelPanel.add(labelField);
@@ -472,8 +529,17 @@ public class SimulationWindow extends JFrame
         if(src.equals(okButton))
         {
           // TODO(marco) add checks that guarantees that the label is fine
+          final String validDomainRegex = "([A-Za-z]([A-Za-z0-9]?(\\-[A-Za-z0-9])?)*)";
           String label = labelField.getText();
 
+          if(label.length() >= 64 || (!label.matches(validDomainRegex) && labelField.isEnabled()))
+          {
+            JOptionPane.showMessageDialog(null,
+                                          "Bad domain label, read the instructions",
+                                          "Dotoip - Error",
+                                          JOptionPane.ERROR_MESSAGE);
+            return;
+          }
           if(tree == null)
           {
             tree = displayedTree.addDomain(label);
@@ -481,16 +547,25 @@ public class SimulationWindow extends JFrame
 
             if(autoNsRecordCheck.isSelected())
             {
-              System.out.println("I'm here");
-              List<ResourceRecord> parentRrs = tree.getParent().getResourceRecords();
-              String treeDomainAddress = tree.getDomainAddress();
               for(ResourceRecord rr : rrs)
               {
-                ResourceRecord ns = new ResourceRecord(rr.owner,
-                                                       ResourceRecord.Type.NS,
-                                                       0,
-                                                       treeDomainAddress);
-                parentRrs.add(ns);
+                if(rr.type == ResourceRecord.Type.A
+                  || rr.type == ResourceRecord.Type.AAAA)
+                {
+                  DomainTree parent = tree;
+                  String treeDomainAddress = tree.getDomainAddress();
+                  while((parent = parent.getParent()) != null)
+                  {
+                    ResourceRecord ns = new ResourceRecord(rr.owner,
+                                                           ResourceRecord.Type.NS,
+                                                           0,
+                                                           treeDomainAddress);
+
+                    parent.addResourceRecordToThis(ns);
+
+                    treeDomainAddress = parent.getDomainAddress();
+                  }
+                }
               }
             }
           }
@@ -581,6 +656,7 @@ public class SimulationWindow extends JFrame
         initComponents();
 
         this.pack();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
       }
 
@@ -636,12 +712,19 @@ public class SimulationWindow extends JFrame
         {
           try
           {
-            int    TTL   = Integer.parseInt(ttlField.getText());
+            int    ttl   = Integer.parseInt(ttlField.getText());
+            if(ttl < 0)
+            {
+              throw new NumberFormatException("Invalid negative value inserted for TTL");
+            }
             String owner = ownerField.getText();
             String data  = dataField.getText();
             ResourceRecord.Type type  = (ResourceRecord.Type) typeBox.getSelectedItem();
 
-            rr = new ResourceRecord(owner, type, TTL, data);
+            // since the rdata contained in an rr is a generic string,
+            // no control is done.
+
+            rr = new ResourceRecord(owner, type, ttl, data);
 
             exitState = EXIT_STATE_OK;
             dispose();
@@ -649,7 +732,8 @@ public class SimulationWindow extends JFrame
           catch(NumberFormatException nfe)
           {
             // TODO(marco) handle the exception
-            nfe.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Time to live (TTL) must be a positive or null integer",
+                                          "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
           }
         }
         else if(src.equals(cancelButton))
@@ -657,6 +741,124 @@ public class SimulationWindow extends JFrame
           exitState = EXIT_STATE_CANCELLED;
           dispose();
         }
+      }
+    }
+
+    private class ResponseLogDialog
+      extends JDialog
+    {
+      private final static String Title = "Dotoip - Response Log";
+
+      private List<String> resolverLogLines;
+      private List<String> serverLogLines;
+      private String response;
+
+      public ResponseLogDialog(List<String> resolverLogLines, List<String> serverLogLines, String ipAddr)
+      {
+        super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
+        this.resolverLogLines = resolverLogLines;
+        this.serverLogLines   = serverLogLines;
+        this.response         = ipAddr;
+
+        initComponents();
+
+        this.setSize(new Dimension(600, 600));
+        this.setVisible(true);
+      }
+
+      private void initComponents()
+      {
+        JPanel mainPanel = new JPanel();
+        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
+
+        String resolverLog;
+        if(resolverLogLines.isEmpty())
+        {
+          resolverLog = "<html>Requested address was cached into the server.<br>"+
+                        "<b>IP address: " + response + "</b></html>";
+        }
+        else
+        {
+          resolverLog = "<html>";
+          for(String line : resolverLogLines)
+          {
+            resolverLog += line + "<br>";
+          }
+          resolverLog += "</html>";
+        }
+
+        JEditorPane resolverArea = new JEditorPane("text/html", resolverLog);
+        resolverArea.setEditable(false);
+        resolverArea.setBorder(Utils.createTitledBorder("Resolver log"));
+
+        JScrollPane resolverScroll = new JScrollPane(resolverArea);
+
+        String serverLog;
+        String color;
+        if(serverLogLines.isEmpty())
+        {
+           serverLog = "<html><i color='grey'>No message exchange, cache-hit</i></html>";
+        }
+        else
+        {
+          serverLog = "<html>";
+          for(String line : serverLogLines)
+          {
+            if(line.startsWith("----+"))
+            {
+              color = "green";
+            }
+            else if(line.startsWith("---+"))
+            {
+              color = "blue";
+            }
+            else if(line.startsWith("--+"))
+            {
+              color = "purple";
+            }
+            else
+            {
+              color = "black";
+            }
+            serverLog += "<font color='"+color+"'>" + line + "</font><br>";
+          }
+          serverLog += "</html>";
+        }
+
+        JEditorPane serverArea = new JEditorPane("text/html", serverLog);
+        serverArea.setEditable(false);
+        serverArea.setBorder(Utils.createTitledBorder("Server resolve log"));
+
+        JScrollPane serverScroll = new JScrollPane(serverArea);
+
+        mainPanel.add(resolverScroll);
+        mainPanel.add(serverScroll);
+
+        JPanel optionPanel =  new JPanel();
+
+        JButton okButton = new JButton("OK");
+        okButton.addActionListener((e) ->
+        {
+          PrintWriter out;
+          try
+          {
+            // cleaning the temporary files
+            out = new PrintWriter(new FileOutputStream(new File(Resolver.LastFileWrote)));
+            out.close();
+            out = new PrintWriter(new FileOutputStream(new File(CacheServer.LastFileWrote)));
+            out.close();
+          }
+          catch(IOException ie)
+          {
+            ie.printStackTrace();
+          }
+          dispose();
+        });
+
+        optionPanel.add(okButton);
+
+        this.add(mainPanel, BorderLayout.CENTER);
+        this.add(optionPanel, BorderLayout.SOUTH);
       }
     }
 }

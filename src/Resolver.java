@@ -3,11 +3,15 @@ package src;
 import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class Resolver
-{    
+{
     private CacheServer server;
     private ConcurrentHashMap<Integer, String> pendingRequests;
 
@@ -15,9 +19,11 @@ public class Resolver
 
     private static int globalRequestCounter = 0;
 
-    private static final String LogDirectory = "log/resolver";
-    private static final String LogPrefix    = "resolve_";
-    
+    private static final String LogDirectory  = "log/resolver";
+    private static final String LogPrefix     = "resolve_";
+
+    public static final String LastFileWrote = ".resolverRequest";
+
     public Resolver(CacheServer server)
     {
 	this.server = server;
@@ -35,11 +41,11 @@ public class Resolver
 
 	return requestCode;
     }
-    
+
     public String askAndWait(String domainAddress, RequestType what)
     {
 	int requestCode = ask(domainAddress, what);
-	
+
 	return getOrWait(requestCode);
     }
 
@@ -48,9 +54,9 @@ public class Resolver
 
 	if(!pendingRequests.containsKey(requestCode))
 	    return null;
-	System.out.println("Waiting...");	
+	System.out.println("Waiting...");
 	while(pendingRequests.get(requestCode).equals(NotSet));
-	
+
 	String response = pendingRequests.get(requestCode);
 	pendingRequests.remove(requestCode);
 
@@ -63,7 +69,7 @@ public class Resolver
 	private int         requestCode;
 	private String      domainAddress;
 	private RequestType what;
-	
+
 	public ConnectionHandler(int requestCode, String domainAddress, RequestType what)
 	{
 	    this.domainAddress = domainAddress;
@@ -75,11 +81,11 @@ public class Resolver
 	public void run()
 	{
 	    long time = System.nanoTime();
-	    
+
 	    int responseCode        = server.query(domainAddress, what);
 	    ResourceRecord response = server.getOrWait(responseCode);
 	    pendingRequests.put(requestCode, response.rdata);
-	    
+
 	    time = System.nanoTime() - time;
 	    String filename = LogDirectory + "/" + LogPrefix + domainAddress.replaceAll("\\.", "") + ".txt";
 	    if(!writeLog(filename, response, time))
@@ -90,17 +96,21 @@ public class Resolver
 	{
 	    try
 	    {
-		PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+    		PrintWriter out = new PrintWriter(new FileOutputStream(filename));
 
-		out.println("Starting exchange with the cache server");
-		out.println("-------------------------------------------------------");
-		out.println("Requested IP address of: " + domainAddress);
-		out.println("Cache server response: "   + response.rdata);
-		out.println("Time elapsed: " + (((double)nanoTime)/100000000));
+    		out.println("Starting exchange with the cache server");
+    		out.println("-------------------------------------------------------");
+    		out.println("Requested IP address of: " + domainAddress);
+    		out.println("Cache server response: "   + response.rdata);
+    		out.println("Time elapsed: " + (((double)nanoTime)/100000000));
 
-		out.close();
-		
-		return true;
+    		out.close();
+
+        Files.copy(new File(filename).toPath(),
+                   new File(LastFileWrote).toPath(),
+                   StandardCopyOption.REPLACE_EXISTING);
+
+    		return true;
 	    }
 	    catch(IOException ie)
 	    {

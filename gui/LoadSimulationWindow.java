@@ -34,8 +34,9 @@ public class LoadSimulationWindow extends JFrame
 
     initComponents();
 
-    this.setSize(new Dimension(640, 480));
+    this.pack();
     this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    this.setLocationRelativeTo(null);
     this.setResizable(false);
     this.setVisible(true);
   }

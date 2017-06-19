@@ -147,6 +147,11 @@ public class DomainTree
     cursor.rrs.add(rr);
   }
 
+  public void addResourceRecordToThis(ResourceRecord rr)
+  {
+    this.rrs.add(rr);
+  }
+
   public void addResourceRecords(List<ResourceRecord> rrs)
   {
     for(ResourceRecord rr : rrs)
@@ -234,11 +239,9 @@ public class DomainTree
   {
     if(request.header.method == Message.QueryMethod.ITERATIVE)
     {
-      System.out.println("Responding...");
       Message response = new Message();
 
       String requestedAddress = request.question.name;
-      System.out.println("RR array size: " + rrs.size());
       for(ResourceRecord rr : rrs)
       {
       	if(rr.owner.equals(requestedAddress))
@@ -256,7 +259,6 @@ public class DomainTree
     	    // Implement CNAME
     	    else
     		    response.additional.add(rr);
-    	    System.out.println("Found " + rr.type);
       	}
       }
       return response;

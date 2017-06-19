@@ -3,6 +3,10 @@ package src;
 import java.io.PrintWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.File;
+
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -16,6 +20,8 @@ public class CacheServer
 
   private ConcurrentHashMap<String,  ArrayList<ResourceRecord>> cache;
   private ConcurrentHashMap<Integer, ResourceRecord> responses;
+
+  public static final String LastFileWrote = ".serverResolver";
 
   private static int responseGlobalCounter = 0;
 
@@ -66,7 +72,6 @@ public class CacheServer
     if(cachedRecord != null) // cache-hit
     {
       responses.put(responseCode, cachedRecord);
-      System.out.println("Cache-hit");
       return responseCode;
     }
 
@@ -158,7 +163,7 @@ public class CacheServer
                   cache.get(domainAddress).add(rr);
                   gotAnswer = true;
 
-                  log.add("---- Received IP address: " + rr.rdata);
+                  log.add("----+ Received IP address: " + rr.rdata);
                 }
               } break;
             }
@@ -173,13 +178,13 @@ public class CacheServer
               DomainTree delegate = TLD.getSubtree(rr.rdata);
               authorities.add(delegate);
 
-              log.add("--- Pointed delegate '" + rr.rdata + "'");
+              log.add("---+ Pointed delegate '" + rr.rdata + "'");
               } break;
               case CNAME:
               {
                 tempNames.add(rr.rdata);
 
-                log.add("--- Found alias '" + rr.rdata + "'");
+                log.add("--+ Found alias '" + rr.rdata + "'");
               } break;
             }
           }
@@ -217,9 +222,13 @@ public class CacheServer
         out.println("Received message from resolver, requested IP of '" + domainAddress + "'");
         out.println("---------------------------------------------------");
         for(String line : log)
-        out.println(line);
+          out.println(line);
 
         out.close();
+
+        Files.copy(new File(filename).toPath(),
+                   new File(LastFileWrote).toPath(),
+                   StandardCopyOption.REPLACE_EXISTING);
 
         return true;
       }
