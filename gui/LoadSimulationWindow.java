@@ -25,8 +25,8 @@ public class LoadSimulationWindow extends JFrame
   protected JTextField dbDomainField;
   protected JTextField dbRecordField;
 
-  private final static String DefaultDomainDb = "domain-db.dat";
-  private final static String DefaultRrDb = "rr-db.dat";
+  private final static String DefaultDomainDb = "data/domain-db.dat";
+  private final static String DefaultRrDb = "data/rr-db.dat";
 
   public LoadSimulationWindow()
   {
