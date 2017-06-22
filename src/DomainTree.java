@@ -12,14 +12,21 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.charset.Charset;
 
+/** Classe che rappresenta un server del database dei domini.<br>
+ *  Il server possiede un nome, puo' avere dei server delegati(dei sottoalberi) ma un solo server di livello superiore.
+ *  Il server con un nome indicato da una stringa nulla e' speciale, ed e' detto TLD(Top Level Domain).<br>
+ *  E' solitamente il server radice, sotto la quale stanno il resto dei server
+ */
 public class DomainTree
 {
+  /** Nome del server */
   public String label;
   private DomainTree parent;
   private ArrayList<DomainTree> subtrees;
 
   private ArrayList<ResourceRecord> rrs;
 
+  /** Costruisce un DomainTree con valori di default */
   public DomainTree()
   {
   	this.label    = null;
@@ -27,6 +34,7 @@ public class DomainTree
   	this.rrs      = new ArrayList<ResourceRecord>();
   }
 
+  /** Costruisce un DomainTree avente un dato nome */
   public DomainTree(String label)
   {
   	this.label    = label;
@@ -34,6 +42,7 @@ public class DomainTree
   	this.rrs      = new ArrayList<ResourceRecord>();
   }
 
+  /** Costruisce un DomainTree avente un dato nome e un dato padre */
   public DomainTree(String label, DomainTree parent)
   {
     this.label    = label;
@@ -42,6 +51,13 @@ public class DomainTree
     this.rrs      = new ArrayList<ResourceRecord>();
   }
 
+  /** Legge da un file di testo corrispondente ad un database di domini un DomainTree avente la struttura
+   *  indicata dalla base di dati.
+   *
+   *  @param filename nome del database
+   *  @return TLD
+   *  @throws IOException Se il file indicato non esiste
+   */
   public static DomainTree fromFile(String filename) throws IOException
   {
     List<String> lines = Files.readAllLines(new File(filename).toPath(), Charset.forName("UTF-8"));
@@ -70,6 +86,12 @@ public class DomainTree
     return root;
   }
 
+  /** Legge da un file di testo corrispondente ad un database di ResourceRecord e riempe
+   *  l'albero del database dei server di dominio con i record letti in base alle istruzioni contenute nel database
+   *
+   *  @param filename nome del database
+   *  @throws IOException Se il file indicato non esiste
+   */
   public void loadResourceRecords(String filename) throws IOException
   {
     List<String> lines = Files.readAllLines(new File(filename).toPath(), Charset.forName("UTF-8"));
@@ -110,11 +132,17 @@ public class DomainTree
     }
   }
 
+  /** Aggiunge il record al DomainTree avente il nome indicato.<br>
+   *  Se quest'ultimo non corrisponde ne alla radice ne ad un nodo sottostante semplicemente non
+   *  inserisce il record.
+   *
+   *  @param where indirizzo di dominio che indica il server alla quale aggiungere il record
+   */
   private void addResourceRecord(String where, ResourceRecord rr)
   {
     if(where.equals("."))
     {
-      this.rrs.add(rr);
+      this.rrs.add(rr); // This is bad.
       return;
     }
     String[] domains = where.split("\\.");
@@ -147,11 +175,13 @@ public class DomainTree
     cursor.rrs.add(rr);
   }
 
+  /** Aggiunge il record a questo DomainTree */
   public void addResourceRecordToThis(ResourceRecord rr)
   {
     this.rrs.add(rr);
   }
 
+  /** Aggiunge la lista dei record a questo DomainTree */
   public void addResourceRecords(List<ResourceRecord> rrs)
   {
     for(ResourceRecord rr : rrs)
@@ -160,6 +190,9 @@ public class DomainTree
     }
   }
 
+  /** Aggiunge un nuovo DomainTree come sottoalbero corrente, lo denomina con il nome indicato
+   *  e ne ritorna un riferimento.
+   */
   public DomainTree addDomain(String domain)
   {
     DomainTree subtree = new DomainTree(domain, this);
@@ -167,11 +200,13 @@ public class DomainTree
     return subtree;
   }
 
+  /** Ritorna una lista dei sottoalberi */
   public List<DomainTree> getSubtrees()
   {
 	   return subtrees;
   }
 
+  /** Ritorna la profondita' del nodo, ovvero la distanza in nodi dalla radice */
   public int getDepth()
   {
     DomainTree cursor = this;
@@ -184,6 +219,10 @@ public class DomainTree
     return depth;
   }
 
+  /** Ritorna l'indirizzo di domini corrispondente al nodo.
+   *
+   *  @param reversed se vero ritorna una stringa nel formato www.example.com, altrimenti com.example.www
+   */
   public String getDomainAddress(boolean reversed)
   {
     if(parent == null)
@@ -194,21 +233,31 @@ public class DomainTree
       return label + "." + parent.getDomainAddress(reversed);
   }
 
+  /** Ritorna l'indirizzo di domini in formato standard corrispondente al nodo.
+   *
+   *  @param reversed se vero ritorna una strina nel formato www.example.com, altrimenti com.example.www
+   */
   public String getDomainAddress()
   {
     return getDomainAddress(false);
   }
 
+  /** Ritorna il DomainTree padre di quello corrente */
   public DomainTree getParent()
   {
     return parent;
   }
 
+  /** Ritorna un riferimento all'arrayc contenente i ResourceRecord del nodo */
   public ArrayList<ResourceRecord> getResourceRecords()
   {
     return rrs;
   }
 
+  /** Ritorna il DomainTree corrispondente all'indirizzo di dominio indicato.
+   *
+   * @return il DomainTree cercato, null se non esiste
+   */
   public DomainTree getSubtree(String domainAddress)
   {
     String[] domains = domainAddress.split("\\.");
@@ -235,6 +284,12 @@ public class DomainTree
     return cursor;
   }
 
+  /** Data la richiesta del messaggio compila un'adeguata risposta inserendo nelle varie sezioni
+   *  del messaggio i ResourceRecord posseduti.
+   *
+   *  @param request messaggio di richiesta inviato da un server locale
+   *  @return il messaggio di risposta
+   */
   public Message query(Message request)
   {
     if(request.header.method == Message.QueryMethod.ITERATIVE)
@@ -266,7 +321,7 @@ public class DomainTree
     return null;
   }
 
-
+  /** Rimuove il DomainTree riferito da parametro */
   public boolean removeDomain(DomainTree e)
   {
     int i = 0;
@@ -285,12 +340,14 @@ public class DomainTree
     return false;
   }
 
+  /** Ritorna il nome del DomainTree */
   @Override
   public String toString()
   {
     return label;
   }
 
+  /** Ritorna una rappresentazione testuale del DomainTree e di tutti i nodi sottostanti */
   public String toStringSubtree()
   {
   	String spacing = "";
@@ -303,6 +360,10 @@ public class DomainTree
   	return string;
   }
 
+  /** Trascrive sul file un database dei domini testuale che puo' essere ricaricato con fromFile
+   *
+   *  @throws IOException in caso di errore di IO
+   */
   public void writeDomains(File file)
     throws IOException
   {
@@ -316,6 +377,7 @@ public class DomainTree
     wout.close();
   }
 
+  /** Metodo di supporto a writeDomains, utilizzata per scrivere sul file richiamando ricorsivamente questo metodo*/
   private void writeDomainsRecursive(PrintWriter out)
     throws IOException
   {
@@ -339,6 +401,10 @@ public class DomainTree
     }
   }
 
+  /** Trascrive sul file un database dei ResourceRecord testuale che puo' essere ricaricato con loadResourceRecords
+   *
+   *  @throws IOException in caso di errore di IO
+   */
   public void writeResourceRecords(File file)
     throws IOException
   {
@@ -352,6 +418,7 @@ public class DomainTree
     wout.close();
   }
 
+  /** Metodo di supporto a writeResourceRecords, utilizzata per scrivere sul file richiamando ricorsivamente questo metodo*/
   private void writeRecords(PrintWriter out)
     throws IOException
   {

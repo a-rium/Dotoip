@@ -47,6 +47,7 @@ import src.ResourceRecord;
 
 import misc.Utils;
 
+/** Finestra di simulazione. Da qua sara' possibile effettuare una richiesta, e modificare il database dei domini */
 public class SimulationWindow
   extends JFrame
   implements ActionListener
@@ -70,6 +71,7 @@ public class SimulationWindow
     protected JList<DomainTree> serverList;
     protected DefaultListModel<DomainTree> serverListModel;
 
+    /** Costruisce una finestra ed inizializza da zero una simulazione */
     public SimulationWindow()
     {
     	super(Title);
@@ -89,6 +91,9 @@ public class SimulationWindow
     	this.setVisible(true);
     }
 
+    /** Costruisce una finestra ed inizializza la simulazione provando a caricare i database
+     *  @throws IOException in caso uno dei due file non sia disponibile/non esista/non si hanno le permissioni
+     */
     public SimulationWindow(String domainDb, String recordDb)
     	throws IOException
     {
@@ -111,6 +116,7 @@ public class SimulationWindow
     	this.setVisible(true);
     }
 
+    /** Costruisci le componenti ed i layout, e li aggiunge alla finestra */
     private void initComponents()
     {
     	JPanel infoPanel = new JPanel();
@@ -178,6 +184,7 @@ public class SimulationWindow
       this.add(optionPanel, BorderLayout.SOUTH);
     }
 
+    /** Aggiorna la lista dei server */
     private boolean updateDisplay()
     {
       if(displayedTree != null)
@@ -191,6 +198,7 @@ public class SimulationWindow
       return false;
     }
 
+    /** Gestione degli eventi scaturiti dalla pressione dei pulsanti */
     @Override
     public void actionPerformed(ActionEvent e)
     {
@@ -278,6 +286,9 @@ public class SimulationWindow
       }
     }
 
+    /** Ascoltatore di eventi generati dal mouse utilizzato per attivare interazioni con la simulazione
+     *  tramite doppio click.
+     */
     private class DomainListMouseListener
       extends MouseAdapter
     {
@@ -297,6 +308,10 @@ public class SimulationWindow
       }
     }
 
+    /** Menu di popup che compare alla pressione del pulsante destro del mouse sulla lista dei server.<br>
+     *  In base allo stato della selezione abilita' le opzioni di rimozione e aggiornamento del server.
+     *  Permette inoltre di aggiornare il server radice e aggiungere un nuovo server
+     */
     private class DomainListPopupMenu
       extends JPopupMenu
       implements ActionListener
@@ -306,6 +321,7 @@ public class SimulationWindow
       private JMenuItem changeServer;
       private JMenuItem rootInfo;
 
+      /** Costruisce il menu */
       public DomainListPopupMenu()
       {
         super();
@@ -326,6 +342,7 @@ public class SimulationWindow
         this.add(rootInfo);
       }
 
+      /** Mostra il menu e rende selezionabili o meno le opzioni in base allo stato della selezione */
       @Override
       public void show(Component invoker, int x, int y)
       {
@@ -334,6 +351,7 @@ public class SimulationWindow
         super.show(invoker, x, y);
       }
 
+      /** Gestione delle varie opzioni disponibili nel menu */
       @Override
       public void actionPerformed(ActionEvent e)
       {
@@ -378,6 +396,9 @@ public class SimulationWindow
       }
     }
 
+    /** Finestra legata a quella di simulazione che permette la configurazione di un nuovo server
+     *  o la modifica di uno preesistente.
+     */
     private class SetupServerDialog
       extends JDialog
       implements ActionListener
@@ -402,11 +423,15 @@ public class SimulationWindow
 
       protected DomainTree tree;
 
+      /** Indica come si e' usciti dalla finestra*/
       public int exitState;
 
+      /** Si e' usciti tramite la pressione del pulsante OK*/
       public final static int EXIT_STATE_OK = 0;
+      /** Si e' usciti tramite la pressione del pulsante Annulla*/
       public final static int EXIT_STATE_CANCELLED = 1;
 
+      /** Costruisce la finestra*/
       public SetupServerDialog()
       {
         super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
@@ -420,6 +445,10 @@ public class SimulationWindow
         this.setVisible(true);
       }
 
+      /** Costruisce la finestra in modo da mostrare le informazioni del DomainTree indicato.<br>
+       *
+       * @param modifiableLabel se vero e' possibile modificare il nome del server, altrimenti no
+      */
       public SetupServerDialog(DomainTree tree, boolean modifiableLabel)  // modify already existing tree
       {
         super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
@@ -443,11 +472,15 @@ public class SimulationWindow
         this.setVisible(true);
       }
 
+      /** Costruisce la finestra in modo da mostrare le informazioni del DomainTree indicato.<br>
+       *  E' possibile modificare il nome del DomainTree
+       */
       public SetupServerDialog(DomainTree tree)
       {
         this(tree, true);
       }
 
+      /** Inizializza le componenti ed i layout, e li aggiunge alla finestra */
       private void initComponents()
       {
         JPanel labelPanel = new JPanel();
@@ -520,6 +553,7 @@ public class SimulationWindow
         this.add(optionPanel, BorderLayout.SOUTH);
       }
 
+      /** Gestione degli eventi generati dalla pressione dei vari pulsanti */
       @Override
       public void actionPerformed(ActionEvent e)
       {
@@ -611,6 +645,7 @@ public class SimulationWindow
         }
       }
 
+      /** Aggiorna la lista dei record */
       private void updateList()
       {
         rrModel.clear();
@@ -620,7 +655,7 @@ public class SimulationWindow
         }
       }
     }
-
+    /** Finestra contenente un form per l'inserimento di un nuovo record */
     private class AddRecordDialog
       extends JDialog
       implements ActionListener
@@ -638,13 +673,17 @@ public class SimulationWindow
       protected JButton okButton;
       protected JButton cancelButton;
 
+      /** Indica come si e' usciti dalla finestra*/
       public int exitState;
 
+      /** Si e' usciti tramite la pressione del pulsante OK*/
       public final static int EXIT_STATE_OK = 0;
+      /** Si e' usciti tramite la pressione del pulsante Annulla*/
       public final static int EXIT_STATE_CANCELLED = 1;
 
       public ResourceRecord rr;
 
+      /** Costruisce la finestra e la lega a quella passata come parametro*/
       public AddRecordDialog(SetupServerDialog ref, String holder)
       {
         super(ref, Title, Dialog.ModalityType.DOCUMENT_MODAL);
@@ -658,6 +697,7 @@ public class SimulationWindow
         this.setVisible(true);
       }
 
+      /** Inizializza le componenti ed i layout, e li aggiunge alla finestra*/
       private void initComponents()
       {
         JPanel mainPanel = new JPanel(new GridLayout(6, 2));
@@ -703,7 +743,8 @@ public class SimulationWindow
         this.add(optionPanel, BorderLayout.SOUTH);
       }
 
-      public void actionPerformed(ActionEvent e)
+    /** Gestione degli eventi scaturiti dalla pressione dei pulsanti presenti nella pagina*/
+    public void actionPerformed(ActionEvent e)
       {
         Object src = e.getSource();
         if(src.equals(okButton))
@@ -742,6 +783,7 @@ public class SimulationWindow
       }
     }
 
+    /** Finestra nella quale vengono visualizzati i 2 log di risposta, quello del resolver e quello del local server*/
     private class ResponseLogDialog
       extends JDialog
     {
@@ -751,6 +793,7 @@ public class SimulationWindow
       private List<String> serverLogLines;
       private String response;
 
+      /** Costruisce la finestra dati gli array di stringhe passati come parametro*/
       public ResponseLogDialog(List<String> resolverLogLines, List<String> serverLogLines, String ipAddr)
       {
         super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
@@ -764,6 +807,7 @@ public class SimulationWindow
         this.setVisible(true);
       }
 
+      /** Inizializza le componenti ed i layout, oltre che colorare le stringhe dei log in base ad alcuni criteri. In seguito aggiunge il tutto alla finestra*/
       private void initComponents()
       {
         JPanel mainPanel = new JPanel();

@@ -13,12 +13,16 @@ import java.io.IOException;
 
 import misc.Utils;
 
+/** Finestra che mostra il menu principale dell'applicazione.
+ *  Da qua si puo' scegliere se iniziare una nuova simulazione, caricare i dati di una precedente o uscire
+ */
 public class MainWindow extends JFrame
 {
   private final static String Title = "Dotoip - Menu Principale";
 
   private final static String LogoFilename = "data/logo.png";
 
+  /** Costruisce e visualizza la finestra */
   public MainWindow()
   {
     super(Title);
@@ -32,6 +36,7 @@ public class MainWindow extends JFrame
     this.setVisible(true);
   }
 
+  /** Costruisce le componenti ed i layout e li aggiunge alla finestra */
   private void initComponents()
   {
     JLabel logoLabel = new JLabel();

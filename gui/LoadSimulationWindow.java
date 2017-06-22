@@ -18,6 +18,9 @@ import javax.swing.SwingConstants;
 
 import misc.Utils;
 
+/** Finestra dalla quale e' possibile selezionare i file contenenti il database dei domini
+ *  ed il database dei ResourceRecord.
+*/
 public class LoadSimulationWindow extends JFrame
 {
   private final static String Title = "Dotoip - Caricamento Simulazione";
@@ -28,6 +31,7 @@ public class LoadSimulationWindow extends JFrame
   private final static String DefaultDomainDb = "data/domain-db.dat";
   private final static String DefaultRrDb = "data/rr-db.dat";
 
+  /** Costruisce la finestra e la visualizza*/
   public LoadSimulationWindow()
   {
     super(Title);
@@ -41,6 +45,7 @@ public class LoadSimulationWindow extends JFrame
     this.setVisible(true);
   }
 
+  /** Inizializza tutte le componenti ed i layout, e li aggiunge alla finestra */
   private void initComponents()
   {
     JLabel domainDbLabel = new JLabel("Nome database domini:", SwingConstants.RIGHT);
@@ -115,6 +120,7 @@ public class LoadSimulationWindow extends JFrame
     this.add(mainPanel);
   }
 
+  /** Ascoltatore di eventi che una volta ricevuto un evento apre un finestra che permette di selezionare un file */
   private class FileChooserOpener
     implements ActionListener
   {

@@ -21,10 +21,12 @@ public class CacheServer
   private ConcurrentHashMap<String,  ArrayList<ResourceRecord>> cache;
   private ConcurrentHashMap<Integer, ResourceRecord> responses;
 
+  /** Nome del file temporaneo dove e' salvato una copia dell'ultimo log di conversazione*/
   public static final String LastFileWrote = ".serverResolver";
 
   private static int responseGlobalCounter = 0;
 
+  /** Dato il TLD costruisce il server locale ad esso connesso */
   public CacheServer(DomainTree TLD)
   {
     this.TLD   = TLD;
@@ -33,6 +35,12 @@ public class CacheServer
     this.responses = new ConcurrentHashMap<Integer, ResourceRecord>();
   }
 
+  /** Ritorna il record contenente la risposta alla richiesta del resolver avente il codice di risposta
+   *  indicato, oppure rimane in attesa fino a quando non e' disponibile.
+   *
+   *  @param responseCode codice di risposta ottenuta dal metodo query
+   *  @return il record con la risposta, null se il codice di risposta non corrisponde con alcuna richiesta
+   */
   public ResourceRecord getOrWait(int responseCode)
   {
     if(!responses.containsKey(responseCode))
@@ -45,26 +53,44 @@ public class CacheServer
     return response;
   }
 
-  // @Useless?
+  /** Controlla se nella cache e' contenuto un record che risponde alla richiesta.
+   *  Se lo trova lo ritorna, altrimenti ritorna null
+   *
+   *  @param domainAddress indirizzo di dominio della quale si vuole sapere un indirizzo corrispondente
+   *  @param what tipo di indirizzo richiesto
+   *  @return record con la risposta, null se non e' presente
+   */
+  @Deprecated
   public ResourceRecord getFromCache(String domainAddress,
                                      RequestType what)
   {
     ResourceRecord.Type type = null;
     if(what == RequestType.IPv4)
-    type = ResourceRecord.Type.A;
+     type = ResourceRecord.Type.A;
     else if(what == RequestType.IPv6)
-    type = ResourceRecord.Type.AAAA;
+     type = ResourceRecord.Type.AAAA;
 
     return checkCache(domainAddress, type);
   }
 
+  /** Richiede al database dei domini un determinato indirizzo.<br>
+   *  Prima di iniziare una conversazione con i vari server del database controlla se
+   *  nella cache e' contenuta un record che risponde alla richiesta.
+   *  La chiamata di questo metodo non blocca l'esecuzione del programma fino a quando non viene ricevuta la risposta.
+   *  Il valore intero puo' essere utilizzato per ottenere la risposta alla richiesta
+   *  passandolo al metodo getOrWait
+   *
+   *  @param domainAddress indirizzo di dominio della quale si vuole sapere un indirizzo corrispondente
+   *  @param what tipo di indirizzo richiesto
+   *  @return record con la risposta, null se non e' presente
+   */
   public int query(String domainAddress, RequestType what)
   {
     ResourceRecord.Type type = null;
     if(what == RequestType.IPv4)
-    type = ResourceRecord.Type.A;
+      type = ResourceRecord.Type.A;
     else if(what == RequestType.IPv6)
-    type = ResourceRecord.Type.AAAA;
+      type = ResourceRecord.Type.AAAA;
 
     int responseCode = responseGlobalCounter++;
 
@@ -82,6 +108,13 @@ public class CacheServer
     return responseCode;
   }
 
+  /** Controlla se nella cache e' contenuto un record che risponde alla richiesta.
+   *  Se lo trova lo ritorna, altrimenti ritorna null
+   *
+   *  @param domainAddress indirizzo di dominio della quale si vuole sapere un indirizzo corrispondente
+   *  @param what tipo di indirizzo richiesto
+   *  @return record con la risposta, null se non e' presente
+   */
   private ResourceRecord checkCache(String domainAddress,
     ResourceRecord.Type type)
   {
@@ -98,6 +131,11 @@ public class CacheServer
     return null;
   }
 
+  /** Thread generato dal metodo query che si occupa di comunicare
+   *  con i server del database dei domini in modo asincrono al thread principale.
+   *  Una volta ricevuta la risposta la inserisce nella HashMap contenente i risultati delle richieste,
+   *  in modo che li si possa ottenere tramite la getOrWait.
+   */
   private class ResourceGetter extends Thread
   {
     private String              domainAddress;
@@ -107,6 +145,10 @@ public class CacheServer
     private static final String LogDirectory = "log/server";
     private static final String LogPrefix    = "dt_search_";
 
+    /** Costruisce il thread in modo che possa contattare i server e comunicargli la richiesta
+     *
+     *  @param responseCode indice della HashMap nella quale sara' salvata la risposta del server
+    */
     public ResourceGetter(String domainAddress, ResourceRecord.Type type,
                           int responseCode)
     {
@@ -117,6 +159,12 @@ public class CacheServer
       responses.put(responseCode, ResourceRecord.INVALID);
     }
 
+    /** Metodo eseguito asincronicamente al thread principale. <br>
+     *  Contatta il server TLD per ottenere i record che lo possano condurre alla risposta
+     *  alla richiesta. Se viene indicato un delegato lo contatta per saperne di piu', e cosi via.<br>
+     *  In caso venga trovato un alias iniziera' a richiedere i record relativi anche a server aventi il nome alternativo<br>
+     *  Al termine della conversazione salva il risultato nella HashMap dei risultati all'indice indicato
+    */
     public void run()
     {
       ArrayList<DomainTree> authorities = new ArrayList<>();
@@ -213,6 +261,12 @@ public class CacheServer
       writeLog(filename, log);
     }
 
+    /** Trascrive la conversazione avvenuta con i vari server del database dei domini
+     *
+     *  @param filename nome del file di log
+     *  @param log stringhe corrispondenti al corpo del log
+     *  @return esito della scrittura
+     */
     private boolean writeLog(String filename, List<String> log)
     {
       try
