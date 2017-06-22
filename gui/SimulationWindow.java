@@ -51,7 +51,7 @@ public class SimulationWindow
   extends JFrame
   implements ActionListener
 {
-    private final static String Title = "Dotoip - Simulating DNS service...";
+    private final static String Title = "Dotoip - Simulando il servizio di DNS...";
 
     protected DomainTree  TLD;
     protected CacheServer server;
@@ -114,10 +114,10 @@ public class SimulationWindow
     private void initComponents()
     {
     	JPanel infoPanel = new JPanel();
-    	infoPanel.setBorder(Utils.createTitledBorder("Information"));
+    	infoPanel.setBorder(Utils.createTitledBorder("Informazioni"));
 
     	currentDomainAddressLabel = new JLabel(".");
-    	infoPanel.add(new JLabel("Current domain address:", SwingConstants.LEFT));
+    	infoPanel.add(new JLabel("Indirizzo di dominio corrente:", SwingConstants.LEFT));
     	infoPanel.add(currentDomainAddressLabel);
 
     	JPanel tldPanel = new JPanel();
@@ -147,7 +147,7 @@ public class SimulationWindow
     	JPanel inputPanel = new JPanel();
 
     	domainAddressField = new JTextField();
-    	requestButton      = new JButton("Ask");
+    	requestButton      = new JButton("Richiedi");
 
     	domainAddressField.setPreferredSize(new Dimension(375, 40));
     	requestButton.setPreferredSize(new Dimension(90, 40));
@@ -165,10 +165,10 @@ public class SimulationWindow
 
       JPanel optionPanel = new JPanel();
 
-      returnButton = new JButton("<< Go back to main menu");
+      returnButton = new JButton("<< Ritorna al menu principale");
       returnButton.addActionListener(this);
 
-      JButton saveButton = new JButton("Save");
+      JButton saveButton = new JButton("Salva");
       saveButton.addActionListener(this);
 
       optionPanel.add(returnButton);
@@ -200,8 +200,8 @@ public class SimulationWindow
   	    DomainTree aux = displayedTree.getParent();
   	    if(aux == null)
   	    {
-  		    JOptionPane.showMessageDialog(null, "Current node has no parent",
-  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
+  		    JOptionPane.showMessageDialog(null, "Il nodo corrente non ha un padre",
+  					      "Dotoip - Errore", JOptionPane.ERROR_MESSAGE);
   	    }
   	    else
   	    {
@@ -217,8 +217,8 @@ public class SimulationWindow
   	    DomainTree aux = serverList.getSelectedValue();
   	    if(aux == null)
   	    {
-  		    JOptionPane.showMessageDialog(null, "No server was selected",
-  					      "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
+  		    JOptionPane.showMessageDialog(null, "Nessun server selezionato",
+  					      "Dotoip - Errore", JOptionPane.ERROR_MESSAGE);
   	    }
   	    else
   	    {
@@ -309,10 +309,10 @@ public class SimulationWindow
       public DomainListPopupMenu()
       {
         super();
-        addServer    = new JMenuItem("Add new server...");
-        removeServer = new JMenuItem("Remove selected server");
-        changeServer = new JMenuItem("Modify selected server");
-        rootInfo     = new JMenuItem("Modify root server info");
+        addServer    = new JMenuItem("Nuovo server...");
+        removeServer = new JMenuItem("Rimuovi server selezionato");
+        changeServer = new JMenuItem("Modifica server selezionato");
+        rootInfo     = new JMenuItem("Modifica le informazioni del server radice");
 
         addServer.addActionListener(this);
         removeServer.addActionListener(this);
@@ -348,8 +348,8 @@ public class SimulationWindow
         }
         else if(src.equals(removeServer))
         {
-          int answer = JOptionPane.showConfirmDialog(null, "Are you sure? Deleting this server will also eliminate all the sub-servers connected to this one",
-                                                    "Dotoip - Warning",
+          int answer = JOptionPane.showConfirmDialog(null, "Sei sicuro? Cancellare questo server vuol dire eliminare anche tutti i sotto server ad esso relativi",
+                                                    "Dotoip - Attenzione",
                                                     JOptionPane.YES_NO_OPTION);
           if(answer == JOptionPane.YES_OPTION)
           {
@@ -451,9 +451,9 @@ public class SimulationWindow
       private void initComponents()
       {
         JPanel labelPanel = new JPanel();
-        labelPanel.setBorder(Utils.createTitledBorder("Server name"));
+        labelPanel.setBorder(Utils.createTitledBorder("Nome del server"));
 
-        JLabel labelLabel = new JLabel("<html>Server name (<i>label</i>) :</html>",
+        JLabel labelLabel = new JLabel("<html>Nome del server (<i>label</i>) :</html>",
                                       SwingConstants.RIGHT);
         labelField = new JTextField();
 
@@ -462,14 +462,14 @@ public class SimulationWindow
 
         labelPanel.add(labelLabel);
         labelPanel.add(labelField);
-        labelPanel.add(new JLabel("<html>(A valid label must be shorter than 64 characters.<br>Only alphanumerical values and hyphens are accepted.)</html>"));
+        labelPanel.add(new JLabel("<html>(Un nome valido &eacute composta da massimo 63 caratteri.<br>Sono accettati solo valori alfanumerici e trattini.)</html>"));
 
         JPanel optionPanel = new JPanel(new GridLayout(1, 5));
 
         okButton = new JButton("OK");
         okButton.addActionListener(this);
 
-        cancelButton = new JButton("Cancel");
+        cancelButton = new JButton("Annulla");
         cancelButton.addActionListener(this);
 
         optionPanel.add(new JLabel());
@@ -483,19 +483,20 @@ public class SimulationWindow
 
         JPanel databasePanel = new JPanel();
         databasePanel.setLayout(new BoxLayout(databasePanel, BoxLayout.PAGE_AXIS));
-        databasePanel.setBorder(Utils.createTitledBorder("RR database"));
+        databasePanel.setBorder(Utils.createTitledBorder("Database RR"));
 
         rrModel = new DefaultListModel<ResourceRecord>();
         rrList = new JList<ResourceRecord>(rrModel);
         JScrollPane scrollPane = new JScrollPane(rrList);
 
-        autoNsRecordCheck = new JCheckBox("Add NS record to the parent server");
+        autoNsRecordCheck = new JCheckBox("Aggiungi record NS a tutti i server antenati");
+        autoNsRecordCheck.setAlignmentX(JCheckBox.CENTER_ALIGNMENT);
         autoNsRecordCheck.setSelected(false);
 
         JPanel databaseOptionPanel = new JPanel(new GridLayout(1, 3));
-        addRecordButton    = new JButton("New record");
-        removeRecordButton = new JButton("Remove");
-        clearRecordButton  = new JButton("Clear All");
+        addRecordButton    = new JButton("Nuovo");
+        removeRecordButton = new JButton("Rimuovi");
+        clearRecordButton  = new JButton("Rimuovi tutto");
 
         addRecordButton.addActionListener(this);
         removeRecordButton.addActionListener(this);
@@ -532,8 +533,8 @@ public class SimulationWindow
           if(label.length() >= 64 || (!label.matches(validDomainRegex) && labelField.isEnabled()))
           {
             JOptionPane.showMessageDialog(null,
-                                          "Bad domain label, read the instructions",
-                                          "Dotoip - Error",
+                                          "Nome del server non accettabile, leggi le istruzioni",
+                                          "Dotoip - Errore",
                                           JOptionPane.ERROR_MESSAGE);
             return;
           }
@@ -624,7 +625,7 @@ public class SimulationWindow
       extends JDialog
       implements ActionListener
     {
-      private final static String Title = "Dotoip - Add Record Menu";
+      private final static String Title = "Dotoip - Aggiungi Record";
 
       private String holder;
 
@@ -660,35 +661,35 @@ public class SimulationWindow
       private void initComponents()
       {
         JPanel mainPanel = new JPanel(new GridLayout(6, 2));
-        mainPanel.setBorder(Utils.createTitledBorder("Resource Record information"));
+        mainPanel.setBorder(Utils.createTitledBorder("Informazioni Resource Record"));
 
         ownerField = new JTextField();
         ttlField = new JTextField();
         dataField = new JTextField();
         typeBox = new JComboBox<ResourceRecord.Type>(ResourceRecord.Type.getEnums());
 
-        mainPanel.add(new JLabel("Holder:", SwingConstants.LEFT));
+        mainPanel.add(new JLabel("Contenitore:", SwingConstants.LEFT));
         mainPanel.add(new JLabel(holder));
 
-        mainPanel.add(new JLabel("Owner:", SwingConstants.LEFT));
+        mainPanel.add(new JLabel("Possessore:", SwingConstants.LEFT));
         mainPanel.add(ownerField);
 
         mainPanel.add(new JLabel("TTL:", SwingConstants.LEFT));
         mainPanel.add(ttlField);
 
-        mainPanel.add(new JLabel("Type:", SwingConstants.LEFT));
+        mainPanel.add(new JLabel("Tipo:", SwingConstants.LEFT));
         mainPanel.add(typeBox);
 
-        mainPanel.add(new JLabel("Class:", SwingConstants.LEFT));
+        mainPanel.add(new JLabel("Classe:", SwingConstants.LEFT));
         mainPanel.add(new JLabel("IN"));
 
-        mainPanel.add(new JLabel("Data:", SwingConstants.LEFT));
+        mainPanel.add(new JLabel("Dati:", SwingConstants.LEFT));
         mainPanel.add(dataField);
 
         JPanel optionPanel = new JPanel(new GridLayout(1, 4));
 
         okButton = new JButton("OK");
-        cancelButton = new JButton("Cancel");
+        cancelButton = new JButton("Annulla");
 
         okButton.addActionListener(this);
         cancelButton.addActionListener(this);
@@ -729,8 +730,8 @@ public class SimulationWindow
           catch(NumberFormatException nfe)
           {
             // TODO(marco) handle the exception
-            JOptionPane.showMessageDialog(null, "Time to live (TTL) must be a positive or null integer",
-                                          "Dotoip - Error", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Il time to live (TTL) deve essere un numero intero nullo o positivo",
+                                          "Dotoip - Errore", JOptionPane.ERROR_MESSAGE);
           }
         }
         else if(src.equals(cancelButton))
@@ -744,7 +745,7 @@ public class SimulationWindow
     private class ResponseLogDialog
       extends JDialog
     {
-      private final static String Title = "Dotoip - Response Log";
+      private final static String Title = "Dotoip - Log di risposta";
 
       private List<String> resolverLogLines;
       private List<String> serverLogLines;
@@ -771,8 +772,8 @@ public class SimulationWindow
         String resolverLog;
         if(resolverLogLines.isEmpty())
         {
-          resolverLog = "<html>Requested address was cached into the server.<br>"+
-                        "<b>IP address: " + response + "</b></html>";
+          resolverLog = "<html>L'indirizzo richiesto era memorizzato nella cache del server.<br>"+
+                        "<b>Indirizzo IP: " + response + "</b></html>";
         }
         else
         {
@@ -786,7 +787,7 @@ public class SimulationWindow
 
         JEditorPane resolverArea = new JEditorPane("text/html", resolverLog);
         resolverArea.setEditable(false);
-        resolverArea.setBorder(Utils.createTitledBorder("Resolver log"));
+        resolverArea.setBorder(Utils.createTitledBorder("Log del resolver"));
 
         JScrollPane resolverScroll = new JScrollPane(resolverArea);
 
@@ -794,7 +795,7 @@ public class SimulationWindow
         String color;
         if(serverLogLines.isEmpty())
         {
-           serverLog = "<html><i color='grey'>No message exchange, cache-hit</i></html>";
+           serverLog = "<html><i color='grey'>Nessuno scambio di messaggi, cache-hit</i></html>";
         }
         else
         {
@@ -824,7 +825,7 @@ public class SimulationWindow
 
         JEditorPane serverArea = new JEditorPane("text/html", serverLog);
         serverArea.setEditable(false);
-        serverArea.setBorder(Utils.createTitledBorder("Server resolve log"));
+        serverArea.setBorder(Utils.createTitledBorder("Log della risoluzione del server"));
 
         JScrollPane serverScroll = new JScrollPane(serverArea);
 

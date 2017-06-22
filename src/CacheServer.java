@@ -141,14 +141,14 @@ public class CacheServer
           message.question.name = name;
           message.question.type = this.type;
 
-          log.add("Request: " + message.header.method + " query, searching in domain '" + currentAuthority.getDomainAddress() + "' for " + this.type + " records of '" + name + "'");
+          log.add("Richiesta: " + message.header.method + " query, cercando nel dominio '" + currentAuthority.getDomainAddress() + "' per " + this.type + " record di '" + name + "'");
 
           long elapsedTime = System.nanoTime();
 
           Message response = currentAuthority.query(message);
 
           elapsedTime = System.nanoTime() - elapsedTime;
-          log.add("Response received in " + (((double)elapsedTime)/1000000000) + " seconds.");
+          log.add("Risposta ricevuta in " + (((double)elapsedTime)/1000000000) + " secondi.");
 
           for(ResourceRecord rr : response.answers)
           {
@@ -163,7 +163,7 @@ public class CacheServer
                   cache.get(domainAddress).add(rr);
                   gotAnswer = true;
 
-                  log.add("----+ Received IP address: " + rr.rdata);
+                  log.add("----+ Ricevuto indirizzo IP: " + rr.rdata);
                 }
               } break;
             }
@@ -178,13 +178,13 @@ public class CacheServer
               DomainTree delegate = TLD.getSubtree(rr.rdata);
               authorities.add(delegate);
 
-              log.add("---+ Pointed delegate '" + rr.rdata + "'");
+              log.add("---+ Indicato server delegato '" + rr.rdata + "'");
               } break;
               case CNAME:
               {
                 tempNames.add(rr.rdata);
 
-                log.add("--+ Found alias '" + rr.rdata + "'");
+                log.add("--+ TRovato un alias '" + rr.rdata + "'");
               } break;
             }
           }
@@ -203,7 +203,7 @@ public class CacheServer
       }
       if(!gotAnswer)
       {
-        log.add("Could not find an appropriate answer for the request");
+        log.add("Non e' stato possibile individuare una risposta appropriata per la richiesta");
         responseRecord = new ResourceRecord(domainAddress, ResourceRecord.Type.UNSET, 0, "Not found");
       }
 
@@ -219,7 +219,7 @@ public class CacheServer
       {
         PrintWriter out = new PrintWriter(new FileOutputStream(filename));
 
-        out.println("Received message from resolver, requested IP of '" + domainAddress + "'");
+        out.println("Ricevuto messaggio da resolver, richiesto l'indirizzo IP di '" + domainAddress + "'");
         out.println("---------------------------------------------------");
         for(String line : log)
           out.println(line);

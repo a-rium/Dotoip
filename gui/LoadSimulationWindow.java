@@ -20,7 +20,7 @@ import misc.Utils;
 
 public class LoadSimulationWindow extends JFrame
 {
-  private final static String Title = "Dotoip - Load Setup";
+  private final static String Title = "Dotoip - Caricamento Simulazione";
 
   protected JTextField dbDomainField;
   protected JTextField dbRecordField;
@@ -43,7 +43,7 @@ public class LoadSimulationWindow extends JFrame
 
   private void initComponents()
   {
-    JLabel domainDbLabel = new JLabel("Domain DB filepath:", SwingConstants.RIGHT);
+    JLabel domainDbLabel = new JLabel("Nome database domini:", SwingConstants.RIGHT);
     dbDomainField = new JTextField(DefaultDomainDb);
     JButton chooseDomainDb = new JButton("...");
     chooseDomainDb.addActionListener(new FileChooserOpener(dbDomainField));
@@ -57,7 +57,7 @@ public class LoadSimulationWindow extends JFrame
     domainPathPanel.add(dbDomainField);
     domainPathPanel.add(chooseDomainDb);
 
-    JLabel recordDbLabel = new JLabel("Resource Record DB filepath:", SwingConstants.RIGHT);
+    JLabel recordDbLabel = new JLabel("Nome database Resource Record:", SwingConstants.RIGHT);
     dbRecordField = new JTextField(DefaultRrDb);
     JButton chooseRecordDb = new JButton("...");
     chooseRecordDb.addActionListener(new FileChooserOpener(dbRecordField));
@@ -71,14 +71,14 @@ public class LoadSimulationWindow extends JFrame
     recordPathPanel.add(dbRecordField);
     recordPathPanel.add(chooseRecordDb);
 
-    JButton loadDbsButton = new JButton("Load database");
+    JButton loadDbsButton = new JButton("Carica database");
     loadDbsButton.addActionListener((e) ->
     {
       String domainPath = dbDomainField.getText();
       if(domainPath == null)
       {
   	    JOptionPane.showMessageDialog(null,
-  				      "No domain database path was choosen. Please choose one.",
+                "Non e' stato scelto il database dei domini",
   				      "Dotoip - Errore",
   				      JOptionPane.ERROR_MESSAGE);
       }
@@ -86,7 +86,7 @@ public class LoadSimulationWindow extends JFrame
       if(recordPath == null)
   	  {
         JOptionPane.showMessageDialog(null,
-  				      "No record database was choosen. Please choose one.",
+                "Non e' stato scelto il database dei Resource Record",
   				      "Dotoip - Errore",
   				      JOptionPane.ERROR_MESSAGE);
       }
@@ -103,7 +103,7 @@ public class LoadSimulationWindow extends JFrame
     });
 
     JPanel pathsPanel = new JPanel(new GridLayout(3, 1));
-    pathsPanel.setBorder(Utils.createTitledBorder("Databases paths"));
+    pathsPanel.setBorder(Utils.createTitledBorder("Indirizzi dei database"));
     pathsPanel.add(domainPathPanel);
     pathsPanel.add(recordPathPanel);
     pathsPanel.add(loadDbsButton);

@@ -15,7 +15,7 @@ import misc.Utils;
 
 public class MainWindow extends JFrame
 {
-  private final static String Title = "Dotoip - Main Menu";
+  private final static String Title = "Dotoip - Menu Principale";
 
   private final static String LogoFilename = "data/logo.png";
 
@@ -47,7 +47,7 @@ public class MainWindow extends JFrame
                         "<font style='font-size: 30' color=orange>IP</font><br>" +
                         "<font style='font-size: 20' color=blue>DNS service simulator</font></div></html>");
     }
-    JButton newSimulationButton = new JButton("Start new simulation...");
+    JButton newSimulationButton = new JButton("Inizia una nuova simulazione");
     newSimulationButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
     newSimulationButton.addActionListener((e) ->
     {
@@ -55,7 +55,7 @@ public class MainWindow extends JFrame
       dispose();
     });
 
-    JButton loadSimulationButton = new JButton("Load existing simulation");
+    JButton loadSimulationButton = new JButton("Carica simulazione da file");
     loadSimulationButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
     loadSimulationButton.addActionListener((e) ->
     {
@@ -63,7 +63,7 @@ public class MainWindow extends JFrame
       dispose();
     });
 
-    JButton quitButton = new JButton("Quit");
+    JButton quitButton = new JButton("Esci");
     quitButton.setAlignmentX(JButton.CENTER_ALIGNMENT);
     quitButton.addActionListener((e) -> dispose());
 
