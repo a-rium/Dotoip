@@ -490,6 +490,7 @@ public class SimulationWindow
         JScrollPane scrollPane = new JScrollPane(rrList);
 
         autoNsRecordCheck = new JCheckBox("Add NS record to the parent server");
+        autoNsRecordCheck.setAlignmentX(JCheckBox.CENTER_ALIGNMENT);
         autoNsRecordCheck.setSelected(false);
 
         JPanel databaseOptionPanel = new JPanel(new GridLayout(1, 3));
