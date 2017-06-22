@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Dialog;
+import java.awt.Component;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -135,6 +136,7 @@ public class SimulationWindow
       serverList = new JList<DomainTree>(serverListModel);
       serverList.addMouseListener(new DomainListMouseListener());
       serverList.addListSelectionListener((e) -> forwardButton.setEnabled(true));
+		  serverList.setComponentPopupMenu(new DomainListPopupMenu());
 
       JScrollPane scrollPane = new JScrollPane(serverList);
 
@@ -292,16 +294,6 @@ public class SimulationWindow
             updateDisplay();
           }
         }
-        else if(e.isPopupTrigger())
-        {
-          generatePopupMenu(e);
-        }
-      }
-
-      private void generatePopupMenu(MouseEvent e)
-      {
-        DomainListPopupMenu popup = new DomainListPopupMenu();
-        popup.show(e.getComponent(), e.getX(), e.getY());
       }
     }
 
@@ -327,14 +319,19 @@ public class SimulationWindow
         changeServer.addActionListener(this);
         rootInfo.addActionListener(this);
 
-        removeServer.setEnabled(serverList.getSelectedValue() != null);
-        changeServer.setEnabled(serverList.getSelectedValue() != null);
-
         this.add(addServer);
         this.add(removeServer);
         this.add(changeServer);
         this.addSeparator();
         this.add(rootInfo);
+      }
+
+      @Override
+      public void show(Component invoker, int x, int y)
+      {
+        removeServer.setEnabled(serverList.getSelectedValue() != null);
+        changeServer.setEnabled(serverList.getSelectedValue() != null);
+        super.show(invoker, x, y);
       }
 
       @Override
