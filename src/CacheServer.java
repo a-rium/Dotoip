@@ -232,7 +232,7 @@ public class CacheServer
               {
                 tempNames.add(rr.rdata);
 
-                log.add("--+ TRovato un alias '" + rr.rdata + "'");
+                log.add("--+ Trovato un alias '" + rr.rdata + "'");
               } break;
             }
           }

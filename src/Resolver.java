@@ -145,11 +145,11 @@ public class Resolver
       {
         PrintWriter out = new PrintWriter(new FileOutputStream(filename));
 
-        out.println("Starting exchange with the cache server");
+        out.println("Iniziando la conversazione con il server locale");
         out.println("-------------------------------------------------------");
-        out.println("Requested IP address of: " + domainAddress);
-        out.println("Cache server response: "   + response.rdata);
-        out.println("Time elapsed: " + (((double)nanoTime)/100000000));
+        out.println("Richiesto l'indirizzo IP: " + domainAddress);
+        out.println("Risposta del server locale: "   + response.rdata);
+        out.println("Tempo trascorso: " + (((double)nanoTime)/100000000) + " secondi");
 
         out.close();
 
