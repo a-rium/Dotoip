@@ -14,6 +14,9 @@ import javax.swing.ImageIcon;
 import java.io.IOException;
 import java.io.File;
 
+import java.net.URL;
+import java.net.URISyntaxException;
+
 /** Classe di metodi statici che possono tornare utili */
 public class Utils
 {
@@ -35,7 +38,18 @@ public class Utils
 	public static ImageIcon readIcon(String filename, int width, int height)
 		throws IOException
 	{
-		BufferedImage img = ImageIO.read(new File(filename));
+		BufferedImage img;
+		System.out.println("Trying to load resource '" + "/"+filename + "'");
+		URL jarFilepath = Utils.class.getResource("/"+filename);
+		if(jarFilepath != null)
+		{
+			img = ImageIO.read(jarFilepath);
+			System.out.println("Loaded from jar");
+		}
+		else
+		{
+			img = ImageIO.read(new File(filename));
+		}
 		Image scaled      = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
 
 		return new ImageIcon(scaled);
