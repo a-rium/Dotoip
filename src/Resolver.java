@@ -89,6 +89,7 @@ public class Resolver
     String response = pendingRequests.get(requestCode);
     pendingRequests.remove(requestCode);
 
+
     return response;
   }
 
