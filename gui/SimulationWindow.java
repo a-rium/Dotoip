@@ -260,6 +260,8 @@ public class SimulationWindow
       else if(src.equals(requestButton))
       {
     	    String domainAddress = domainAddressField.getText();
+          String stdDomainAddress = (domainAddress.startsWith(".")) ?
+                                    domainAddress : "." + domainAddress;
           RequestType type = null;
           if(ipv4RadioButton.isSelected())
           {
@@ -270,10 +272,10 @@ public class SimulationWindow
             type = RequestType.IPv6;
           }
 
-    	    String address = resolver.askAndWait(domainAddress, type);
+    	    String address = resolver.askAndWait(stdDomainAddress, type);
           try
           {
-            ResponseLogDialog logDialog = new ResponseLogDialog(domainAddress, address);
+            ResponseLogDialog logDialog = new ResponseLogDialog(stdDomainAddress, address);
           }
           catch(IOException ie)
           {
@@ -329,6 +331,7 @@ public class SimulationWindow
           if(aux != null)
           {
             displayedTree = aux;
+            forwardButton.setEnabled(false);
             backButton.setEnabled(true);
             updateDisplay();
           }

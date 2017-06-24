@@ -299,7 +299,8 @@ public class DomainTree
       String requestedAddress = request.question.name;
       for(ResourceRecord rr : rrs)
       {
-      	if(rr.owner.equals(requestedAddress))
+        String owner = (rr.owner.startsWith(".")) ? rr.owner : "." + rr.owner;
+      	if(owner.equals(requestedAddress))
       	{
     	    if(rr.type == request.question.type)
     	    {
