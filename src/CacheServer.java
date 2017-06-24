@@ -171,11 +171,10 @@ public class CacheServer
     */
     public void run()
     {
-      ArrayList<DomainTree> authorities = new ArrayList<>();
-      ArrayList<String>     log         = new ArrayList<>();
-      ArrayList<String>     domainNames = new ArrayList<>();
-
-
+      ArrayList<DomainTree> authorities   = new ArrayList<>();
+      ArrayList<String>     log           = new ArrayList<>();
+      ArrayList<String>     additionalLog = new ArrayList<>();
+      ArrayList<String>     domainNames   = new ArrayList<>();
 
       authorities.add(TLD);
       domainNames.add(domainAddress);
@@ -217,7 +216,7 @@ public class CacheServer
                   cache.get(domainAddress).add(rr);
                   gotAnswer = true;
 
-                  log.add("----+ Ricevuto indirizzo IP: " + rr.rdata);
+                  log.add("-----+ Ricevuto indirizzo IP: " + rr.rdata);
                 }
               } break;
             }
@@ -245,10 +244,7 @@ public class CacheServer
 
           for(ResourceRecord rr : response.additional)
           {
-            System.out.println(rr.rdata);
-            /* switch(rr.type)
-            {
-            }*/
+            log.add("----+ Record addizionale, tipo: " + rr.type + ", contenuto: " + rr.rdata);
           }
         }
 

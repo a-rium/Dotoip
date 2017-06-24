@@ -8,4 +8,4 @@
 .it.iegames                     0 NS IN .it.iegames.www
 .it.iegames                     0 CNAME IN .it.iegames-mail.www
 .it.iegames.www .it.iegames-mail.www 0 A IN 192.168.1.101
-
+.it.iegames.www .it.iegames-mail.www 0 AAAA IN ::1

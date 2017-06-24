@@ -32,12 +32,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.JComboBox;
 import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JDialog;
 import javax.swing.DefaultListModel;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
+import javax.swing.ButtonGroup;
 
 import src.DomainTree;
 import src.CacheServer;
@@ -63,6 +65,10 @@ public class SimulationWindow
     protected JButton requestButton;
     protected JButton returnButton;
     protected JButton saveButton;
+
+    protected ButtonGroup  ipGroup;
+    protected JRadioButton ipv4RadioButton;
+    protected JRadioButton ipv6RadioButton;
 
     protected JTextField domainAddressField;
     protected JLabel     currentDomainAddressLabel;
@@ -163,11 +169,26 @@ public class SimulationWindow
     	inputPanel.add(domainAddressField);
     	inputPanel.add(requestButton);
 
+      JPanel requestTypePanel = new JPanel();
+
+      ipv4RadioButton = new JRadioButton("IPv4");
+      ipv6RadioButton = new JRadioButton("IPv6");
+
+      ipv4RadioButton.setSelected(true);
+
+      ipGroup = new ButtonGroup();
+      ipGroup.add(ipv4RadioButton);
+      ipGroup.add(ipv6RadioButton);
+
+      requestTypePanel.add(ipv4RadioButton);
+      requestTypePanel.add(ipv6RadioButton);
+
     	JPanel mainPanel = new JPanel();
     	mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
     	mainPanel.add(infoPanel);
     	mainPanel.add(tldPanel);
     	mainPanel.add(inputPanel);
+      mainPanel.add(requestTypePanel);
 
       JPanel optionPanel = new JPanel();
 
@@ -239,8 +260,17 @@ public class SimulationWindow
       else if(src.equals(requestButton))
       {
     	    String domainAddress = domainAddressField.getText();
-    	    String address = resolver.askAndWait(domainAddress,
-    						                               RequestType.IPv4);
+          RequestType type = null;
+          if(ipv4RadioButton.isSelected())
+          {
+            type = RequestType.IPv4;
+          }
+          else if(ipv6RadioButton.isSelected())
+          {
+            type = RequestType.IPv6;
+          }
+
+    	    String address = resolver.askAndWait(domainAddress, type);
           try
           {
             ResponseLogDialog logDialog = new ResponseLogDialog(domainAddress, address);
@@ -812,21 +842,12 @@ public class SimulationWindow
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
-        String resolverLog;
-        // if(resolverLogLines.isEmpty())
-        // {
-        //   resolverLog = "<html>L'indirizzo richiesto era memorizzato nella cache del server.<br>"+
-        //                 "<b>Indirizzo IP: " + response + "</b></html>";
-        // }
-        // else
-        // {
-          resolverLog = "<html>";
-          for(String line : resolverLogLines)
-          {
-            resolverLog += line + "<br>";
-          }
-          resolverLog += "</html>";
-        // }
+        String resolverLog = "<html>";
+        for(String line : resolverLogLines)
+        {
+          resolverLog += line + "<br>";
+        }
+        resolverLog += "</html>";
 
         JEditorPane resolverArea = new JEditorPane("text/html", resolverLog);
         resolverArea.setEditable(false);
@@ -834,20 +855,17 @@ public class SimulationWindow
 
         JScrollPane resolverScroll = new JScrollPane(resolverArea);
 
-        String serverLog;
+        String serverLog = "<html>";
         String color;
-        // if(serverLogLines.isEmpty())
-        // {
-        //    serverLog = "<html><i color='grey'>Nessuno scambio di messaggi, cache-hit</i></html>";
-        // }
-        // else
-        // {
-        serverLog = "<html>";
         for(String line : serverLogLines)
         {
-          if(line.startsWith("----+"))
+          if(line.startsWith("-----+"))
           {
             color = "green";
+          }
+          else if(line.startsWith("----+"))
+          {
+            color = "red";
           }
           else if(line.startsWith("---+"))
           {
@@ -864,7 +882,6 @@ public class SimulationWindow
           serverLog += "<font color='"+color+"'>" + line + "</font><br>";
         }
         serverLog += "</html>";
-        // }
 
         JEditorPane serverArea = new JEditorPane("text/html", serverLog);
         serverArea.setEditable(false);

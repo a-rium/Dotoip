@@ -39,12 +39,10 @@ public class Utils
 		throws IOException
 	{
 		BufferedImage img;
-		System.out.println("Trying to load resource '" + "/"+filename + "'");
 		URL jarFilepath = Utils.class.getResource("/"+filename);
 		if(jarFilepath != null)
 		{
 			img = ImageIO.read(jarFilepath);
-			System.out.println("Loaded from jar");
 		}
 		else
 		{
