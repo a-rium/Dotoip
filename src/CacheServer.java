@@ -5,8 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.File;
 
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+// import java.nio.file.Files;
+// import java.nio.file.StandardCopyOption;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -22,7 +22,7 @@ public class CacheServer
   private ConcurrentHashMap<Integer, ResourceRecord> responses;
 
   /** Nome del file temporaneo dove e' salvato una copia dell'ultimo log di conversazione*/
-  public static final String LastFileWrote = ".serverResolver";
+  // public static final String LastFileWrote = ".serverResolver";
 
   private static int responseGlobalCounter = 0;
 
@@ -97,10 +97,14 @@ public class CacheServer
     ResourceRecord cachedRecord = checkCache(domainAddress, type);
     if(cachedRecord != null) // cache-hit
     {
+      ArrayList<String> log = new ArrayList<>();
+      log.add("<b>Cache-Hit</b>");
+      log.add("<i>Trovata risposta nella cache del server</i>");
       responses.put(responseCode, cachedRecord);
+      String filename = ResourceGetter.LogDirectory + "/" + ResourceGetter.LogPrefix + domainAddress.replaceAll("\\.", "") + ".txt";
+      writeLog(domainAddress, filename, log);
       return responseCode;
     }
-
     ResourceGetter getter = new ResourceGetter(domainAddress, type,
                                                responseCode);
     getter.start();
@@ -142,8 +146,8 @@ public class CacheServer
     private ResourceRecord.Type type;
     private int responseCode;
 
-    private static final String LogDirectory = "log/server";
-    private static final String LogPrefix    = "dt_search_";
+    public static final String LogDirectory = "log/server";
+    public static final String LogPrefix    = "dt_search_";
 
     /** Costruisce il thread in modo che possa contattare i server e comunicargli la richiesta
      *
@@ -170,6 +174,8 @@ public class CacheServer
       ArrayList<DomainTree> authorities = new ArrayList<>();
       ArrayList<String>     log         = new ArrayList<>();
       ArrayList<String>     domainNames = new ArrayList<>();
+
+
 
       authorities.add(TLD);
       domainNames.add(domainAddress);
@@ -258,38 +264,38 @@ public class CacheServer
       responses.put(responseCode, responseRecord);
 
       String filename = LogDirectory + "/" + LogPrefix + domainAddress.replaceAll("\\.", "") + ".txt";
-      writeLog(filename, log);
+      writeLog(domainAddress, filename, log);
     }
 
-    /** Trascrive la conversazione avvenuta con i vari server del database dei domini
-     *
-     *  @param filename nome del file di log
-     *  @param log stringhe corrispondenti al corpo del log
-     *  @return esito della scrittura
-     */
-    private boolean writeLog(String filename, List<String> log)
+  }
+  /** Trascrive la conversazione avvenuta con i vari server del database dei domini
+  *
+  *  @param filename nome del file di log
+  *  @param log stringhe corrispondenti al corpo del log
+  *  @return esito della scrittura
+  */
+  private boolean writeLog(String domainAddress, String filename, List<String> log)
+  {
+    try
     {
-      try
-      {
-        PrintWriter out = new PrintWriter(new FileOutputStream(filename));
+      PrintWriter out = new PrintWriter(new FileOutputStream(filename));
 
-        out.println("Ricevuto messaggio da resolver, richiesto l'indirizzo IP di '" + domainAddress + "'");
-        out.println("---------------------------------------------------");
-        for(String line : log)
-          out.println(line);
+      out.println("Ricevuto messaggio da resolver, richiesto l'indirizzo IP di '" + domainAddress + "'");
+      out.println("---------------------------------------------------");
+      for(String line : log)
+      out.println(line);
 
-        out.close();
+      out.close();
 
-        Files.copy(new File(filename).toPath(),
-                   new File(LastFileWrote).toPath(),
-                   StandardCopyOption.REPLACE_EXISTING);
+      // Files.copy(new File(filename).toPath(),
+      //            new File(LastFileWrote).toPath(),
+      //            StandardCopyOption.REPLACE_EXISTING);
 
-        return true;
-      }
-      catch(IOException ie)
-      {
-        return false;
-      }
+      return true;
+    }
+    catch(IOException ie)
+    {
+      return false;
     }
   }
 }

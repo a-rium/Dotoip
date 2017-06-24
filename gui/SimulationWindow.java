@@ -243,9 +243,7 @@ public class SimulationWindow
     						                               RequestType.IPv4);
           try
           {
-            List<String> resolverLogLines = Files.readAllLines(new File(Resolver.LastFileWrote).toPath());
-            List<String> serverLogLines = Files.readAllLines(new File(CacheServer.LastFileWrote).toPath());
-            ResponseLogDialog logDialog = new ResponseLogDialog(resolverLogLines, serverLogLines, address);
+            ResponseLogDialog logDialog = new ResponseLogDialog(domainAddress, address);
           }
           catch(IOException ie)
           {
@@ -794,11 +792,12 @@ public class SimulationWindow
       private String response;
 
       /** Costruisce la finestra dati gli array di stringhe passati come parametro*/
-      public ResponseLogDialog(List<String> resolverLogLines, List<String> serverLogLines, String ipAddr)
+      public ResponseLogDialog(String domainAddress, String ipAddr)
+        throws IOException
       {
         super(SimulationWindow.this, Title, Dialog.ModalityType.DOCUMENT_MODAL);
-        this.resolverLogLines = resolverLogLines;
-        this.serverLogLines   = serverLogLines;
+        this.resolverLogLines = Files.readAllLines(new File("log/resolver/resolve_"+domainAddress.replaceAll("\\.", "")+".txt").toPath());
+        this.serverLogLines   = Files.readAllLines(new File("log/server/dt_search_"+domainAddress.replaceAll("\\.", "")+".txt").toPath());
         this.response         = ipAddr;
 
         initComponents();
@@ -814,20 +813,20 @@ public class SimulationWindow
         mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.PAGE_AXIS));
 
         String resolverLog;
-        if(resolverLogLines.isEmpty())
-        {
-          resolverLog = "<html>L'indirizzo richiesto era memorizzato nella cache del server.<br>"+
-                        "<b>Indirizzo IP: " + response + "</b></html>";
-        }
-        else
-        {
+        // if(resolverLogLines.isEmpty())
+        // {
+        //   resolverLog = "<html>L'indirizzo richiesto era memorizzato nella cache del server.<br>"+
+        //                 "<b>Indirizzo IP: " + response + "</b></html>";
+        // }
+        // else
+        // {
           resolverLog = "<html>";
           for(String line : resolverLogLines)
           {
             resolverLog += line + "<br>";
           }
           resolverLog += "</html>";
-        }
+        // }
 
         JEditorPane resolverArea = new JEditorPane("text/html", resolverLog);
         resolverArea.setEditable(false);
@@ -837,35 +836,35 @@ public class SimulationWindow
 
         String serverLog;
         String color;
-        if(serverLogLines.isEmpty())
+        // if(serverLogLines.isEmpty())
+        // {
+        //    serverLog = "<html><i color='grey'>Nessuno scambio di messaggi, cache-hit</i></html>";
+        // }
+        // else
+        // {
+        serverLog = "<html>";
+        for(String line : serverLogLines)
         {
-           serverLog = "<html><i color='grey'>Nessuno scambio di messaggi, cache-hit</i></html>";
-        }
-        else
-        {
-          serverLog = "<html>";
-          for(String line : serverLogLines)
+          if(line.startsWith("----+"))
           {
-            if(line.startsWith("----+"))
-            {
-              color = "green";
-            }
-            else if(line.startsWith("---+"))
-            {
-              color = "blue";
-            }
-            else if(line.startsWith("--+"))
-            {
-              color = "purple";
-            }
-            else
-            {
-              color = "black";
-            }
-            serverLog += "<font color='"+color+"'>" + line + "</font><br>";
+            color = "green";
           }
-          serverLog += "</html>";
+          else if(line.startsWith("---+"))
+          {
+            color = "blue";
+          }
+          else if(line.startsWith("--+"))
+          {
+            color = "purple";
+          }
+          else
+          {
+            color = "black";
+          }
+          serverLog += "<font color='"+color+"'>" + line + "</font><br>";
         }
+        serverLog += "</html>";
+        // }
 
         JEditorPane serverArea = new JEditorPane("text/html", serverLog);
         serverArea.setEditable(false);
@@ -879,23 +878,7 @@ public class SimulationWindow
         JPanel optionPanel =  new JPanel();
 
         JButton okButton = new JButton("OK");
-        okButton.addActionListener((e) ->
-        {
-          PrintWriter out;
-          try
-          {
-            // cleaning the temporary files
-            out = new PrintWriter(new FileOutputStream(new File(Resolver.LastFileWrote)));
-            out.close();
-            out = new PrintWriter(new FileOutputStream(new File(CacheServer.LastFileWrote)));
-            out.close();
-          }
-          catch(IOException ie)
-          {
-            ie.printStackTrace();
-          }
-          dispose();
-        });
+        okButton.addActionListener((e) -> dispose() );
 
         optionPanel.add(okButton);
 

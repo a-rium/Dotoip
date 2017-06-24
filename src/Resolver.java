@@ -27,7 +27,7 @@ public class Resolver
   private static final String LogPrefix     = "resolve_";
 
   /** Nome del file temporaneo dove e' salvato una copia dell'ultimo log di conversazione*/
-  public static final String LastFileWrote = ".resolverRequest";
+  // public static final String LastFileWrote = ".resolverRequest";
 
   /** Costruisce il Resolver collegandolo al dato server*/
   public Resolver(CacheServer server)
@@ -84,7 +84,6 @@ public class Resolver
     {
       return null;
     }
-    System.out.println("Waiting...");
     while(pendingRequests.get(requestCode).equals(NotSet));
 
     String response = pendingRequests.get(requestCode);
@@ -153,9 +152,9 @@ public class Resolver
 
         out.close();
 
-        Files.copy(new File(filename).toPath(),
-        new File(LastFileWrote).toPath(),
-        StandardCopyOption.REPLACE_EXISTING);
+        // Files.copy(new File(filename).toPath(),
+        //   new File(LastFileWrote).toPath(),
+        //   StandardCopyOption.REPLACE_EXISTING);
 
         return true;
       }
