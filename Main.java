@@ -11,10 +11,13 @@ import gui.MainWindow;
 /** Classe contenente il punto di inizio dell'applicazione */
 public class Main
 {
+  public static final String[] LocalDirectories = { "log/server", "log/resolver" };
+
   /** Punto di inizio dell'applicazione */
   public static void main(String[] args)
     throws IOException
   {
+    buildFilesystemStructure(LocalDirectories);
     new MainWindow();
   }
 
