@@ -1,11 +1,69 @@
 .               .com.amazon.www 0 NS IN .com
 .com                            0 NS IN .com.amazon
 .com.amazon                     0 NS IN .com.amazon.www
-.com.amazon.www                 0 A IN 192.168.1.100
+.com.amazon.www                 0 A IN 192.168.1.1
 
-.               .it.iegames.www 0 NS IN .it
-.it                             0 NS IN .it.iegames
-.it.iegames                     0 NS IN .it.iegames.www
-.it.iegames                     0 CNAME IN .it.iegames-mail.www
-.it.iegames.www .it.iegames-mail.www 0 A IN 192.168.1.101
-.it.iegames.www .it.iegames-mail.www 0 AAAA IN ::1
+.               .com.twitter.www 0 NS IN .com
+.com                             0 NS IN .com.twitter
+.com.twitter                     0 NS IN .com.twitter.www
+.com.twitter.www                 0 A IN 192.168.1.2
+
+
+.               .com.google.www 0 NS IN .com
+.com                            0 NS IN .com.google
+.com.google                     0 NS IN .com.google.www
+.com.google.www                 0 A IN 192.168.1.3
+.               .com.google.mail 0 NS IN .com
+.com                             0 NS IN .com.google
+.com.google                      0 NS IN .com.google.mail
+.com.google.mail                 0 A IN 192.168.1.4
+.               .com.google.drive 0 NS IN .com
+.com                              0 NS IN .com.google
+.com.google                       0 CNAME IN .com.google.mail
+
+
+. .com.youtube.www 0 NS IN .com
+.com .com.youtube.www 0 NS IN .com.youtube
+.com.youtube .com.youtube.www 0 NS IN .com.youtube.www
+.com.youtube.www .com.youtube.www 0 A IN 192.168.1.5
+
+
+. .com.github.www 0 NS IN .com
+. .com.github.ftp 0 NS IN .com
+.com .com.github.www 0 NS IN .com.github
+.com .com.github.ftp 0 NS IN .com.github
+.com.github .com.github.www 0 NS IN .com.github.www
+.com.github .com.github.ftp 0 NS IN .com.github.ftp
+.com.github.www .com.github.www 0 A IN 192.168.1.6
+.com.github.ftp .com.github.ftp 0 A IN 192.168.1.7
+
+
+. .it.gov.ittfedifermi.www 0 NS IN .it
+. .it.gov.ittfedifermi.mail 0 NS IN .it
+.it .it.gov.ittfedifermi.www 0 NS IN .it.gov
+.it .it.gov.ittfedifermi.mail 0 NS IN .it.gov
+.it.gov .it.gov.ittfedifermi.www 0 NS IN .it.gov.ittfedifermi
+.it.gov .it.gov.ittfedifermi.mail 0 NS IN .it.gov.ittfedifermi
+.it.gov.ittfedifermi .it.gov.ittfedifermi.www 0 NS IN .it.gov.ittfedifermi.www
+.it.gov.ittfedifermi .it.gov.ittfedifermi.mail 0 CNAME IN .it.gov.ittfedifermi.www
+.it.gov.ittfedifermi.www .it.gov.ittfedifermi.www 0 A IN 192.168.1.8
+
+. .it.microsoft.www 0 NS IN .it
+.it .it.microsoft.www 0 NS IN .it.microsoft
+.it.microsoft .it.microsoft.www 0 NS IN .it.microsoft.www
+.it.microsoft.www .it.microsoft.www 0 A IN 192.168.1.9
+
+. .it.microsoft.www 0 NS IN .it
+.it .it.microsoft.www 0 NS IN .it.microsoft
+.it.microsoft .it.microsoft.www 0 NS IN .it.microsoft.www
+.it.microsoft.www .it.microsoft.www 0 A IN 192.168.1.10
+
+. .tv.hitbox.www 0 NS IN .tv
+.tv .tv.hitbox.www 0 NS IN .tv.hitbox
+.tv.hitbox .tv.hitbox.www 0 NS IN .tv.hitbox.www
+.tv.hitbox.www .tv.hitbox.www 0 A IN 192.168.1.11
+
+. .tv.twitch.www 0 NS IN .tv
+.tv .tv.twitch.www 0 NS IN .tv.twitch
+.tv.twitch .tv.twitch.www 0 NS IN .tv.twitch.www
+.tv.twitch.www .tv.twitch.www 0 A IN 192.168.1.12

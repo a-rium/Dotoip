@@ -186,9 +186,9 @@ public class CacheServer
       {
         DomainTree currentAuthority = authorities.remove(authorities.size()-1);  // pop()
 
-        ArrayList<String> tempNames = new ArrayList<>(); // used to gather all the CNAMEs found
-        for(String name : domainNames)
+        for(int index = 0; index<domainNames.size(); index++)
         {
+          String name = domainNames.get(index);
           Message message = new Message();
           message.header.method = Message.QueryMethod.ITERATIVE;
           message.question.name = name;
@@ -228,14 +228,14 @@ public class CacheServer
             {
               case NS:
               {
-              DomainTree delegate = TLD.getSubtree(rr.rdata);
-              authorities.add(delegate);
+                  DomainTree delegate = TLD.getSubtree(rr.rdata);
+                  authorities.add(delegate);
 
-              log.add("---+ Indicato server delegato '" + rr.rdata + "'");
+                  log.add("---+ Indicato server delegato '" + rr.rdata + "'");
               } break;
               case CNAME:
               {
-                tempNames.add(rr.rdata);
+                domainNames.add(rr.rdata);
 
                 log.add("--+ Trovato un alias '" + rr.rdata + "'");
               } break;
@@ -247,9 +247,6 @@ public class CacheServer
             log.add("----+ Record addizionale, tipo: " + rr.type + ", contenuto: " + rr.rdata);
           }
         }
-
-        for(String names : tempNames) // Moving from the temporary array to the real one
-          domainNames.add(names);
       }
       if(!gotAnswer)
       {
